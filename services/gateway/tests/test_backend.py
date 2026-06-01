@@ -1,4 +1,4 @@
-from gateway_app.backend import BackendConfig
+from gateway_app.backend import BackendConfig, QwenBackend
 
 
 def test_backend_config_reads_user_facing_env_defaults(monkeypatch):
@@ -7,6 +7,7 @@ def test_backend_config_reads_user_facing_env_defaults(monkeypatch):
     monkeypatch.setenv("ENABLE_DIARIZATION", "false")
     monkeypatch.setenv("ENABLE_TIMESTAMPS", "false")
     monkeypatch.setenv("IDLE_TIMEOUT", "77")
+    monkeypatch.setenv("ASR_READY_TIMEOUT", "1888")
 
     config = BackendConfig.from_env()
 
@@ -15,6 +16,7 @@ def test_backend_config_reads_user_facing_env_defaults(monkeypatch):
     assert config.enable_diarization is False
     assert config.enable_timestamps is False
     assert config.idle_timeout == 77
+    assert config.ready_timeout == 1888
 
 
 def test_backend_config_builds_transcription_form_with_request_overrides(monkeypatch):
@@ -30,3 +32,9 @@ def test_backend_config_builds_transcription_form_with_request_overrides(monkeyp
     assert data["model"] == "qwen3-asr-0.6b"
     assert data["enable_speaker_diarization"] == "true"
     assert data["response_format"] == "verbose_json"
+
+
+def test_qwen_backend_starts_wrapped_child_entrypoint():
+    backend = QwenBackend()
+
+    assert backend.lifecycle.command == ["/opt/venv/bin/python", "-m", "gateway_app.qwen_child"]

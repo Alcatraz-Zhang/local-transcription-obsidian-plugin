@@ -27,6 +27,7 @@ class BackendConfig:
     enable_diarization: bool = True
     enable_timestamps: bool = True
     idle_timeout: int = 300
+    ready_timeout: int = 1800
 
     @classmethod
     def from_env(cls) -> "BackendConfig":
@@ -36,6 +37,7 @@ class BackendConfig:
             enable_diarization=_env_bool("ENABLE_DIARIZATION", True),
             enable_timestamps=_env_bool("ENABLE_TIMESTAMPS", True),
             idle_timeout=int(os.getenv("IDLE_TIMEOUT", "300")),
+            ready_timeout=int(os.getenv("ASR_READY_TIMEOUT", "1800")),
         )
 
     def transcription_form(self, *, language: str | None = None, model: str | None = None) -> dict[str, str]:
@@ -62,13 +64,13 @@ class QwenBackend:
         backend_url: str = "http://127.0.0.1:18000",
         command: list[str] | None = None,
         config: BackendConfig | None = None,
-        ready_timeout: int = 900,
+        ready_timeout: int | None = None,
     ) -> None:
         self.backend_url = backend_url.rstrip("/")
         self.config = config or BackendConfig.from_env()
-        self.ready_timeout = ready_timeout
+        self.ready_timeout = ready_timeout if ready_timeout is not None else self.config.ready_timeout
         self.lifecycle = BackendLifecycle(
-            command=command or ["/opt/venv/bin/python", "start.py"],
+            command=command or ["/opt/venv/bin/python", "-m", "gateway_app.qwen_child"],
             ready_check=self._wait_for_ready,
             idle_timeout=self.config.idle_timeout,
         )

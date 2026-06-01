@@ -26,6 +26,25 @@ class FakeBackend:
         }
 
 
+class FakeLifecycle:
+    running = True
+    active_tasks = 0
+
+    def __init__(self):
+        self.stop_calls = 0
+
+    def stop_if_idle(self):
+        self.stop_calls += 1
+        self.running = False
+        return True
+
+
+class FakeLifecycleBackend(FakeBackend):
+    def __init__(self):
+        super().__init__()
+        self.lifecycle = FakeLifecycle()
+
+
 def test_jobs_endpoint_saves_audio_and_returns_completed_job(tmp_path):
     backend = FakeBackend()
     app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
@@ -78,3 +97,15 @@ def test_health_reports_runtime_configuration(tmp_path):
 
     assert response.status_code == 200
     assert response.json()["idle_timeout_seconds"] == 123
+
+
+def test_health_triggers_idle_backend_stop(tmp_path):
+    backend = FakeLifecycleBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True, idle_timeout=123)
+    client = TestClient(app)
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["backend_running"] is False
+    assert backend.lifecycle.stop_calls == 1

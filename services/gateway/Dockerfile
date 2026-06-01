@@ -13,7 +13,7 @@ ENV PYTHONPATH=/gateway:/app \
     HOST=127.0.0.1 \
     PORT=18000 \
     HF_HOME=/root/.cache/huggingface \
-    MODELSCOPE_PATH=/root/.cache/modelscope/hub/models \
+    MODELSCOPE_PATH=/root/.cache/modelscope/models \
     MODELSCOPE_CACHE=/root/.cache/modelscope \
     HF_HUB_DISABLE_XET=1
 

@@ -67,6 +67,14 @@ nvidia-smi
 
 After `IDLE_TIMEOUT`, the Qwen3-ASR child process should exit and VRAM should drop. The container itself remains running.
 
+First-time model download can be slow. Increase `ASR_READY_TIMEOUT` in `.env` if the backend is still downloading or loading models when readiness expires.
+
+Model caches are persisted in Docker volumes. Hugging Face models live under
+`/root/.cache/huggingface`, and ModelScope models live under
+`/root/.cache/modelscope/models/{model_id}`. The gateway starts Qwen3-ASR
+through a small wrapper so Qwen's internal model integrity checks use the same
+ModelScope cache layout that the installed SDK writes.
+
 ## Obsidian Plugin
 
 Build output is written to:

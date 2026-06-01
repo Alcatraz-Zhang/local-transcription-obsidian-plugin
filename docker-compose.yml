@@ -13,13 +13,14 @@ services:
     environment:
       GATEWAY_PORT: 17002
       IDLE_TIMEOUT: ${IDLE_TIMEOUT:-300}
+      ASR_READY_TIMEOUT: ${ASR_READY_TIMEOUT:-1800}
       ASR_MODEL: ${ASR_MODEL:-auto}
       LANGUAGE: ${LANGUAGE:-auto}
       ENABLE_DIARIZATION: ${ENABLE_DIARIZATION:-true}
       ENABLE_TIMESTAMPS: ${ENABLE_TIMESTAMPS:-true}
       HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
       HF_HOME: /root/.cache/huggingface
-      MODELSCOPE_PATH: /root/.cache/modelscope/hub/models
+      MODELSCOPE_PATH: /root/.cache/modelscope/models
       MODELSCOPE_CACHE: /root/.cache/modelscope
       NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
     deploy:

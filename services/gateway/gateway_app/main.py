@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 import threading
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -39,13 +40,39 @@ def create_app(
     storage_root: Path | None = None,
     run_jobs_inline: bool = False,
     idle_timeout: int | None = None,
+    idle_check_interval: float = 5.0,
 ) -> FastAPI:
     root = storage_root or Path("/data")
     audio_dir = root / "audio"
     backend = backend or QwenBackend()
     jobs: dict[str, dict[str, Any]] = {}
+    stop_idle_monitor = threading.Event()
 
-    app = FastAPI(title="Obsidian Local ASR Gateway")
+    def stop_backend_if_idle() -> bool:
+        lifecycle = getattr(backend, "lifecycle", None)
+        stop_if_idle = getattr(lifecycle, "stop_if_idle", None)
+        if not callable(stop_if_idle):
+            return False
+        return bool(stop_if_idle())
+
+    def idle_monitor() -> None:
+        while not stop_idle_monitor.wait(idle_check_interval):
+            stop_backend_if_idle()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        if getattr(backend, "lifecycle", None) is None:
+            yield
+            return
+        thread = threading.Thread(target=idle_monitor, daemon=True)
+        thread.start()
+        app.state.idle_monitor_thread = thread
+        try:
+            yield
+        finally:
+            stop_idle_monitor.set()
+
+    app = FastAPI(title="Obsidian Local ASR Gateway", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -82,6 +109,7 @@ def create_app(
 
     @app.get("/health")
     async def health() -> dict[str, Any]:
+        stop_backend_if_idle()
         lifecycle = getattr(backend, "lifecycle", None)
         backend_config = getattr(backend, "config", None)
         return {
