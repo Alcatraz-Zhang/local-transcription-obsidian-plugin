@@ -14,4 +14,4 @@
 - [x] Implement gateway formatter, lifecycle manager, `/jobs`, `/health`, and OpenAI-compatible endpoint.
 - [x] Implement plugin template, transcript, post-processing, gateway client, settings, and main plugin entry.
 - [x] Add Docker Compose, gateway Dockerfile, `.env.example`, README, and pinned upstream reference.
-- [x] Run final verification: plugin tests, gateway tests, plugin build, compose config, git status.
+- [x] Run final verification: plugin tests, gateway tests, plugin build, compose config, Docker build, gateway health smoke test, git status.

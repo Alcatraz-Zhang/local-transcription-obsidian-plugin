@@ -59,3 +59,14 @@ def test_openai_endpoint_returns_timestamped_text(tmp_path):
     assert response.status_code == 200
     assert response.json()["text"] == "[00:00:00 - 00:00:01] Speaker1: 大家好。\n"
     assert response.json()["segments"][0]["speaker"] == "Speaker1"
+
+
+def test_health_reports_runtime_configuration(tmp_path):
+    backend = FakeBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True, idle_timeout=123)
+    client = TestClient(app)
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["idle_timeout_seconds"] == 123

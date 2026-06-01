@@ -3,6 +3,7 @@ from __future__ import annotations
 import mimetypes
 import os
 import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -12,21 +13,64 @@ from .formatter import normalize_response
 from .lifecycle import BackendLifecycle
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+@dataclass(frozen=True)
+class BackendConfig:
+    asr_model: str = "auto"
+    language: str = "auto"
+    enable_diarization: bool = True
+    enable_timestamps: bool = True
+    idle_timeout: int = 300
+
+    @classmethod
+    def from_env(cls) -> "BackendConfig":
+        return cls(
+            asr_model=(os.getenv("ASR_MODEL") or "auto").strip() or "auto",
+            language=(os.getenv("LANGUAGE") or "auto").strip() or "auto",
+            enable_diarization=_env_bool("ENABLE_DIARIZATION", True),
+            enable_timestamps=_env_bool("ENABLE_TIMESTAMPS", True),
+            idle_timeout=int(os.getenv("IDLE_TIMEOUT", "300")),
+        )
+
+    def transcription_form(self, *, language: str | None = None, model: str | None = None) -> dict[str, str]:
+        selected_language = language if language and language != "auto" else self.language
+        selected_model = model if model and model != "auto" else self.asr_model
+        data: dict[str, str] = {}
+        if self.enable_timestamps:
+            data["response_format"] = "verbose_json"
+        else:
+            data["response_format"] = "json"
+        if self.enable_diarization:
+            data["enable_speaker_diarization"] = "true"
+        if selected_language and selected_language != "auto":
+            data["language"] = selected_language
+        if selected_model and selected_model != "auto":
+            data["model"] = selected_model
+        return data
+
+
 class QwenBackend:
     def __init__(
         self,
         *,
         backend_url: str = "http://127.0.0.1:18000",
         command: list[str] | None = None,
-        idle_timeout: int | None = None,
+        config: BackendConfig | None = None,
         ready_timeout: int = 900,
     ) -> None:
         self.backend_url = backend_url.rstrip("/")
+        self.config = config or BackendConfig.from_env()
         self.ready_timeout = ready_timeout
         self.lifecycle = BackendLifecycle(
             command=command or ["/opt/venv/bin/python", "start.py"],
             ready_check=self._wait_for_ready,
-            idle_timeout=idle_timeout if idle_timeout is not None else int(os.getenv("IDLE_TIMEOUT", "300")),
+            idle_timeout=self.config.idle_timeout,
         )
 
     def _wait_for_ready(self) -> bool:
@@ -53,14 +97,7 @@ class QwenBackend:
         self.lifecycle.mark_activity_started()
         try:
             self.lifecycle.ensure_ready()
-            data: dict[str, str] = {
-                "response_format": "verbose_json",
-                "enable_speaker_diarization": "true",
-            }
-            if language and language != "auto":
-                data["language"] = language
-            if model and model != "auto":
-                data["model"] = model
+            data = self.config.transcription_form(language=language, model=model)
             content_type = mimetypes.guess_type(audio_path.name)[0] or "application/octet-stream"
             with audio_path.open("rb") as handle:
                 with httpx.Client(timeout=3600) as client:
@@ -74,4 +111,3 @@ class QwenBackend:
             return normalize_response(result)
         finally:
             self.lifecycle.mark_activity_finished()
-

@@ -38,6 +38,7 @@ def create_app(
     backend: Any | None = None,
     storage_root: Path | None = None,
     run_jobs_inline: bool = False,
+    idle_timeout: int | None = None,
 ) -> FastAPI:
     root = storage_root or Path("/data")
     audio_dir = root / "audio"
@@ -84,11 +85,15 @@ def create_app(
     @app.get("/health")
     async def health() -> dict[str, Any]:
         lifecycle = getattr(backend, "lifecycle", None)
+        backend_config = getattr(backend, "config", None)
         return {
             "status": "ok",
             "backend_running": bool(getattr(lifecycle, "running", False)),
             "active_tasks": int(getattr(lifecycle, "active_tasks", 0)),
             "queued_jobs": sum(1 for job in jobs.values() if job["status"] in {"queued", "running"}),
+            "idle_timeout_seconds": idle_timeout
+            if idle_timeout is not None
+            else int(getattr(backend_config, "idle_timeout", 0) or 0),
         }
 
     @app.post("/jobs")
@@ -147,4 +152,3 @@ def create_app(
 
 
 app = create_app()
-
