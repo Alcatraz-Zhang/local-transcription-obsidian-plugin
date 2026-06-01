@@ -13,7 +13,7 @@ Obsidian plugin
       -> idle timeout terminates the child process to release VRAM
 ```
 
-The Obsidian plugin owns recording/upload, audio file storage, note creation, templates, and external LLM post-processing. The gateway owns ASR job queueing, backend lifecycle, and stable transcript formatting.
+The Obsidian plugin owns recording/upload, audio file storage, transcript formatting, note creation, templates, and external LLM post-processing. The gateway owns ASR job queueing, backend lifecycle, and stable `segments` / `sentence_info` normalization.
 
 ## Development
 
@@ -34,6 +34,14 @@ Plugin tests only:
 ```powershell
 npm run test:plugin
 ```
+
+Test audio lives in `transcript_test_samples/`:
+
+- `english_librispeech_6930-75918-0000.wav` for quick English smoke tests.
+- `chinese_speech_dataset_chinese.mp3` for quick Chinese smoke tests.
+- `long_warandpeacevolume2_71_tolstoy.mp3` for long-audio/manual queue tests.
+
+The matching `.txt` files are expected-text references for manual ASR quality checks; unit tests do not load the ASR model.
 
 ## Docker
 
@@ -90,6 +98,8 @@ Default transcript format:
 [00:00:06 - 00:00:12] Speaker2: ...
 ```
 
+The gateway does not inject this formatted transcript into `text`. It returns structured segment data, and the plugin renders the final note according to the selected output mode.
+
 ## API
 
 - `GET /health`
@@ -98,6 +108,20 @@ Default transcript format:
 - `POST /v1/audio/transcriptions`
 
 `/jobs` is the primary long-audio path for the plugin. `/v1/audio/transcriptions` is kept for OpenAI-compatible clients.
+
+Gateway responses preserve structured transcript data:
+
+```json
+{
+  "text": "raw backend text if provided",
+  "segments": [
+    { "start": 0.0, "end": 5.0, "speaker": "Speaker1", "text": "..." }
+  ],
+  "sentence_info": [
+    { "start": 0.0, "end": 5.0, "speaker": "Speaker1", "text": "..." }
+  ]
+}
+```
 
 ## Notes
 

@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .backend import QwenBackend
-from .formatter import OutputMode, normalize_response, render_text_transcript
+from .formatter import normalize_response
 
 
 def _safe_filename(value: str, default: str = "audio") -> str:
@@ -65,9 +65,7 @@ def create_app(
                 model=job.get("model"),
                 output_mode=job.get("output_mode", "speaker_timestamp"),
             )
-            payload = normalize_response(payload)
-            payload["text"] = render_text_transcript(payload, job.get("output_mode", "speaker_timestamp"))
-            job["result"] = payload
+            job["result"] = normalize_response(payload)
             job["status"] = "completed"
             job["error"] = None
         except Exception as exc:
@@ -101,7 +99,6 @@ def create_app(
         file: UploadFile = File(...),
         language: str = Form("auto"),
         model: str = Form("auto"),
-        output_mode: OutputMode = Form("speaker_timestamp"),
     ) -> JSONResponse:
         source_name = _safe_filename(file.filename or "audio.wav")
         timestamp = datetime.now().strftime("%Y-%m-%d %H-%M-%S")
@@ -117,7 +114,6 @@ def create_app(
             "audio_path": str(audio_path),
             "language": language or "auto",
             "model": model or "auto",
-            "output_mode": output_mode,
             "created_at": now,
             "updated_at": now,
             "result": None,
@@ -144,9 +140,7 @@ def create_app(
         with audio_path.open("wb") as handle:
             shutil.copyfileobj(file.file, handle)
         payload = backend.transcribe(audio_path, language=language, model=model, output_mode="speaker_timestamp")
-        payload = normalize_response(payload)
-        payload["text"] = render_text_transcript(payload, "speaker_timestamp")
-        return JSONResponse(payload)
+        return JSONResponse(normalize_response(payload))
 
     return app
 

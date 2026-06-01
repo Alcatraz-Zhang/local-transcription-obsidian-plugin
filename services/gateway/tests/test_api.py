@@ -40,12 +40,19 @@ def test_jobs_endpoint_saves_audio_and_returns_completed_job(tmp_path):
     assert response.status_code == 200
     job = response.json()
     assert job["status"] == "completed"
-    assert job["result"]["text"] == "[00:00:00 - 00:00:01] Speaker1: 大家好。\n"
+    assert job["result"]["segments"][0] == {
+        "start": 0.0,
+        "end": 1.0,
+        "speaker": "Speaker1",
+        "text": "大家好。",
+    }
+    assert job["result"]["text"] == "大家好。"
+    assert job["result"]["sentence_info"][0] == job["result"]["segments"][0]
     assert Path(job["audio_path"]).exists()
     assert backend.calls[0]["language"] == "zh"
 
 
-def test_openai_endpoint_returns_timestamped_text(tmp_path):
+def test_openai_endpoint_returns_structured_segments(tmp_path):
     backend = FakeBackend()
     app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
     client = TestClient(app)
@@ -57,8 +64,9 @@ def test_openai_endpoint_returns_timestamped_text(tmp_path):
     )
 
     assert response.status_code == 200
-    assert response.json()["text"] == "[00:00:00 - 00:00:01] Speaker1: 大家好。\n"
+    assert response.json()["text"] == "大家好。"
     assert response.json()["segments"][0]["speaker"] == "Speaker1"
+    assert response.json()["sentence_info"][0]["speaker"] == "Speaker1"
 
 
 def test_health_reports_runtime_configuration(tmp_path):

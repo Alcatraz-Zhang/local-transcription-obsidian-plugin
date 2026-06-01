@@ -60,3 +60,24 @@ def test_lifecycle_does_not_stop_while_active():
 
     assert lifecycle.stop_if_idle() is False
     assert processes[0].terminated is False
+
+
+def test_lifecycle_terminates_process_when_ready_check_fails():
+    processes = []
+    lifecycle = BackendLifecycle(
+        command=["fake"],
+        ready_check=lambda: False,
+        popen=lambda command: processes.append(FakeProcess()) or processes[-1],
+        now=time.monotonic,
+        idle_timeout=300,
+    )
+
+    try:
+        lifecycle.ensure_ready()
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("ensure_ready should raise when backend is not ready")
+
+    assert processes[0].terminated is True
+    assert lifecycle.running is False

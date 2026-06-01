@@ -8,9 +8,27 @@ export interface NormalizedSegment {
   words?: unknown[];
 }
 
+type RawSegment = {
+  start?: number;
+  end?: number;
+  speaker?: string;
+  text?: string;
+  words?: unknown[];
+  start_time?: number;
+  end_time?: number;
+  begin_time?: number;
+  begin_time_milliseconds?: number;
+  end_time_milliseconds?: number;
+  speaker_id?: string;
+  spk?: string;
+  sentence?: string;
+  raw_text?: string;
+};
+
 export interface GatewayTranscript {
   text?: string;
-  segments?: NormalizedSegment[];
+  segments?: RawSegment[];
+  sentence_info?: RawSegment[];
 }
 
 export function formatTimestamp(seconds: number | undefined): string {
@@ -38,10 +56,55 @@ export function formatTranscript(segments: NormalizedSegment[], mode: OutputMode
     .join("\n");
 }
 
+function cleanAsrText(value: unknown): string {
+  return String(value ?? "")
+    .replace(/\s*language\s+[^<]*<asr_text>\s*/gi, "")
+    .replace(/<asr_text>/g, "")
+    .trim();
+}
+
+function timeValue(segment: RawSegment, keys: Array<keyof RawSegment>): number {
+  for (const key of keys) {
+    const value = segment[key];
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      continue;
+    }
+    if ((key === "begin_time" || key === "end_time" || key === "begin_time_milliseconds" || key === "end_time_milliseconds") && numeric > 1000) {
+      return numeric / 1000;
+    }
+    return numeric;
+  }
+  return 0;
+}
+
+export function normalizeSegments(payload: GatewayTranscript): NormalizedSegment[] {
+  const source = payload.segments?.length ? payload.segments : payload.sentence_info ?? [];
+  return source
+    .map((segment): NormalizedSegment | null => {
+      const text = cleanAsrText(segment.text ?? segment.sentence ?? segment.raw_text);
+      if (!text) {
+        return null;
+      }
+      const speaker = cleanAsrText(segment.speaker ?? segment.speaker_id ?? segment.spk);
+      return {
+        start: timeValue(segment, ["start", "start_time", "begin_time", "begin_time_milliseconds"]),
+        end: timeValue(segment, ["end", "end_time", "end_time_milliseconds"]),
+        speaker: speaker || undefined,
+        text,
+        words: Array.isArray(segment.words) ? segment.words : undefined
+      };
+    })
+    .filter((segment): segment is NormalizedSegment => segment !== null);
+}
+
 export function transcriptText(payload: GatewayTranscript, mode: OutputMode): string {
-  if (payload.segments?.length) {
-    return formatTranscript(payload.segments, mode);
+  const segments = normalizeSegments(payload);
+  if (segments.length) {
+    return formatTranscript(segments, mode);
   }
   return payload.text?.trim() ?? "";
 }
-

@@ -125,9 +125,47 @@ function formatTranscript(segments, mode) {
     return `${range} ${segment.speaker?.trim() || "Speaker"}: ${text}`;
   }).join("\n");
 }
+function cleanAsrText(value) {
+  return String(value ?? "").replace(/\s*language\s+[^<]*<asr_text>\s*/gi, "").replace(/<asr_text>/g, "").trim();
+}
+function timeValue(segment, keys) {
+  for (const key of keys) {
+    const value = segment[key];
+    if (value === void 0 || value === null || value === "") {
+      continue;
+    }
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      continue;
+    }
+    if ((key === "begin_time" || key === "end_time" || key === "begin_time_milliseconds" || key === "end_time_milliseconds") && numeric > 1e3) {
+      return numeric / 1e3;
+    }
+    return numeric;
+  }
+  return 0;
+}
+function normalizeSegments(payload) {
+  const source = payload.segments?.length ? payload.segments : payload.sentence_info ?? [];
+  return source.map((segment) => {
+    const text = cleanAsrText(segment.text ?? segment.sentence ?? segment.raw_text);
+    if (!text) {
+      return null;
+    }
+    const speaker = cleanAsrText(segment.speaker ?? segment.speaker_id ?? segment.spk);
+    return {
+      start: timeValue(segment, ["start", "start_time", "begin_time", "begin_time_milliseconds"]),
+      end: timeValue(segment, ["end", "end_time", "end_time_milliseconds"]),
+      speaker: speaker || void 0,
+      text,
+      words: Array.isArray(segment.words) ? segment.words : void 0
+    };
+  }).filter((segment) => segment !== null);
+}
 function transcriptText(payload, mode) {
-  if (payload.segments?.length) {
-    return formatTranscript(payload.segments, mode);
+  const segments = normalizeSegments(payload);
+  if (segments.length) {
+    return formatTranscript(segments, mode);
   }
   return payload.text?.trim() ?? "";
 }

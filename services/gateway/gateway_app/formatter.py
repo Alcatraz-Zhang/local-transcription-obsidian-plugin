@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Literal
-
-OutputMode = Literal["plain", "timestamp", "speaker_timestamp"]
+from typing import Any
 
 QWEN_ASR_TAG_RE = re.compile(r"\s*language\s+[^<]*<asr_text>\s*", re.IGNORECASE)
 
@@ -84,34 +82,10 @@ def normalize_response(value: Any) -> Any:
             segments.append(normalized_segment)
     if segments:
         normalized["segments"] = segments
+        normalized["sentence_info"] = segments
 
     if isinstance(normalized.get("text"), str):
         normalized["text"] = clean_asr_text(normalized["text"])
     if isinstance(normalized.get("result"), str):
         normalized["result"] = clean_asr_text(normalized["result"])
     return normalized
-
-
-def render_text_transcript(payload: dict[str, Any], output_mode: OutputMode = "speaker_timestamp") -> str:
-    normalized = normalize_response(payload)
-    segments = normalized.get("segments") if isinstance(normalized, dict) else None
-    if isinstance(segments, list) and segments:
-        lines: list[str] = []
-        for segment in segments:
-            text = clean_asr_text(segment.get("text"))
-            if not text:
-                continue
-            if output_mode == "plain":
-                lines.append(text)
-            elif output_mode == "timestamp":
-                lines.append(f"[{format_timestamp(segment.get('start'))} - {format_timestamp(segment.get('end'))}] {text}")
-            else:
-                speaker = str(segment.get("speaker") or "Speaker").strip() or "Speaker"
-                lines.append(
-                    f"[{format_timestamp(segment.get('start'))} - {format_timestamp(segment.get('end'))}] {speaker}: {text}"
-                )
-        return "\n".join(lines).strip() + ("\n" if lines else "")
-
-    text = clean_asr_text(normalized.get("text") or normalized.get("result") if isinstance(normalized, dict) else "")
-    return text + ("\n" if text else "")
-

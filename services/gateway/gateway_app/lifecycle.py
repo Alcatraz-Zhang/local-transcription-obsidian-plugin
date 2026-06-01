@@ -70,6 +70,16 @@ class BackendLifecycle:
                 self._process = self.popen(self.command)
             self._last_activity = self.now()
         if not self.ready_check():
+            with self._lock:
+                process = self._process
+                self._process = None
+            if process is not None and process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=self.stop_grace)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=self.stop_grace)
             raise RuntimeError("ASR backend failed to become ready")
 
     def stop_if_idle(self) -> bool:
@@ -89,4 +99,3 @@ class BackendLifecycle:
             process.kill()
             process.wait(timeout=self.stop_grace)
         return True
-
