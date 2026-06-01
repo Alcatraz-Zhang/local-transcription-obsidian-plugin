@@ -6,8 +6,8 @@ services:
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-17002}:17002"
     volumes:
-      - asr-huggingface:/models/huggingface
-      - asr-modelscope:/models/modelscope
+      - asr-huggingface:/root/.cache/huggingface
+      - asr-modelscope:/root/.cache/modelscope
       - asr-data:/data
       - asr-logs:/logs
     environment:
@@ -18,6 +18,9 @@ services:
       ENABLE_DIARIZATION: ${ENABLE_DIARIZATION:-true}
       ENABLE_TIMESTAMPS: ${ENABLE_TIMESTAMPS:-true}
       HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
+      HF_HOME: /root/.cache/huggingface
+      MODELSCOPE_PATH: /root/.cache/modelscope/hub/models
+      MODELSCOPE_CACHE: /root/.cache/modelscope
       NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
     deploy:
       resources:
@@ -32,4 +35,3 @@ volumes:
   asr-modelscope:
   asr-data:
   asr-logs:
-
