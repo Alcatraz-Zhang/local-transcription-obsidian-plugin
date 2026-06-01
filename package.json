@@ -1,0 +1,15 @@
+{
+  "name": "obsidian-local-asr-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/obsidian-plugin"
+  ],
+  "scripts": {
+    "test": "npm run test:plugin && npm run test:gateway",
+    "test:plugin": "npm run test -w @local-asr/obsidian-plugin",
+    "test:gateway": "python -m pytest services/gateway/tests -q",
+    "build": "npm run build -w @local-asr/obsidian-plugin"
+  }
+}
+

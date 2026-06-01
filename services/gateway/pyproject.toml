@@ -1,0 +1,19 @@
+[project]
+name = "obsidian-local-asr-gateway"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "httpx>=0.28",
+  "python-multipart>=0.0.20",
+  "uvicorn>=0.34"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+

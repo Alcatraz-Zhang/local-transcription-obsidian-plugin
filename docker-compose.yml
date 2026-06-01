@@ -1,0 +1,35 @@
+services:
+  asr-gateway:
+    build:
+      context: ./services/gateway
+    image: obsidian-local-asr-gateway:0.1.0
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-17002}:17002"
+    volumes:
+      - asr-huggingface:/models/huggingface
+      - asr-modelscope:/models/modelscope
+      - asr-data:/data
+      - asr-logs:/logs
+    environment:
+      GATEWAY_PORT: 17002
+      IDLE_TIMEOUT: ${IDLE_TIMEOUT:-300}
+      ASR_MODEL: ${ASR_MODEL:-auto}
+      LANGUAGE: ${LANGUAGE:-auto}
+      ENABLE_DIARIZATION: ${ENABLE_DIARIZATION:-true}
+      ENABLE_TIMESTAMPS: ${ENABLE_TIMESTAMPS:-true}
+      HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  asr-huggingface:
+  asr-modelscope:
+  asr-data:
+  asr-logs:
+

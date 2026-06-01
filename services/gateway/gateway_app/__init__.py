@@ -1,0 +1,2 @@
+"""Obsidian Local ASR Gateway."""
+
