@@ -145,6 +145,19 @@ function timeValue(segment, keys) {
   }
   return 0;
 }
+function speakerMatchValue(segment) {
+  const match = segment.speaker_match;
+  if (!match) {
+    return void 0;
+  }
+  const normalized = {
+    speakerId: match.speaker_id,
+    displayName: match.display_name,
+    confidence: match.confidence,
+    status: match.status
+  };
+  return Object.values(normalized).some((value) => value !== void 0 && value !== "") ? normalized : void 0;
+}
 function normalizeSegments(payload) {
   const source = payload.segments?.length ? payload.segments : payload.sentence_info ?? [];
   return source.map((segment) => {
@@ -158,7 +171,8 @@ function normalizeSegments(payload) {
       end: timeValue(segment, ["end", "end_time", "end_time_milliseconds"]),
       speaker: speaker || void 0,
       text,
-      words: Array.isArray(segment.words) ? segment.words : void 0
+      words: Array.isArray(segment.words) ? segment.words : void 0,
+      speakerMatch: speakerMatchValue(segment)
     };
   }).filter((segment) => segment !== null);
 }

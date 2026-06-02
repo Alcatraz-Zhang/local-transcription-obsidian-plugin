@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 from typing import Any
 
@@ -40,6 +41,61 @@ def _speaker_value(segment: dict[str, Any]) -> str | None:
     return cleaned or None
 
 
+def _numeric_value(value: Any) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    return numeric if math.isfinite(numeric) else None
+
+
+def _first_present(*values: Any) -> Any | None:
+    for value in values:
+        if value is not None and value != "":
+            return value
+    return None
+
+
+def _first_numeric(*values: Any) -> float | None:
+    for value in values:
+        numeric = _numeric_value(value)
+        if numeric is not None:
+            return numeric
+    return None
+
+
+def _speaker_match_value(segment: dict[str, Any]) -> dict[str, Any] | None:
+    upstream = segment.get("speaker_match")
+    match = upstream if isinstance(upstream, dict) else {}
+    normalized = {
+        "speaker_id": _first_present(
+            match.get("speaker_id"),
+            match.get("matched_speaker_id"),
+            segment.get("matched_speaker_id"),
+            segment.get("speaker_profile_id"),
+        ),
+        "display_name": _first_present(
+            match.get("display_name"),
+            match.get("matched_display_name"),
+            match.get("matched_speaker_name"),
+            segment.get("matched_display_name"),
+            segment.get("matched_speaker_name"),
+            segment.get("speaker_name"),
+        ),
+        "confidence": _first_numeric(
+            match.get("confidence"),
+            match.get("speaker_confidence"),
+            segment.get("speaker_confidence"),
+            segment.get("confidence"),
+        ),
+        "status": match.get("status") or match.get("speaker_match_status") or segment.get("speaker_match_status"),
+    }
+    meaningful = {key: value for key, value in normalized.items() if value is not None and value != ""}
+    return meaningful or None
+
+
 def extract_source_segments(payload: dict[str, Any]) -> list[dict[str, Any]]:
     segments = payload.get("segments") or payload.get("sentence_info") or []
     if not isinstance(segments, list):
@@ -60,6 +116,9 @@ def normalize_segment(segment: dict[str, Any]) -> dict[str, Any] | None:
     speaker = _speaker_value(segment)
     if speaker:
         normalized["speaker"] = speaker
+    speaker_match = _speaker_match_value(segment)
+    if speaker_match:
+        normalized["speaker_match"] = speaker_match
     if isinstance(segment.get("words"), list):
         normalized["words"] = segment["words"]
     return normalized

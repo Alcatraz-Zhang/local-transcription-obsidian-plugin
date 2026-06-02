@@ -6,7 +6,22 @@ export interface NormalizedSegment {
   speaker?: string;
   text: string;
   words?: unknown[];
+  speakerMatch?: SpeakerMatch;
 }
+
+export interface SpeakerMatch {
+  speakerId?: string;
+  displayName?: string;
+  confidence?: number;
+  status?: string;
+}
+
+type RawSpeakerMatch = {
+  speaker_id?: string;
+  display_name?: string;
+  confidence?: number;
+  status?: string;
+};
 
 type RawSegment = {
   start?: number;
@@ -23,6 +38,7 @@ type RawSegment = {
   spk?: string;
   sentence?: string;
   raw_text?: string;
+  speaker_match?: RawSpeakerMatch;
 };
 
 export interface GatewayTranscript {
@@ -81,6 +97,20 @@ function timeValue(segment: RawSegment, keys: Array<keyof RawSegment>): number {
   return 0;
 }
 
+function speakerMatchValue(segment: RawSegment): SpeakerMatch | undefined {
+  const match = segment.speaker_match;
+  if (!match) {
+    return undefined;
+  }
+  const normalized = {
+    speakerId: match.speaker_id,
+    displayName: match.display_name,
+    confidence: match.confidence,
+    status: match.status
+  };
+  return Object.values(normalized).some((value) => value !== undefined && value !== "") ? normalized : undefined;
+}
+
 export function normalizeSegments(payload: GatewayTranscript): NormalizedSegment[] {
   const source = payload.segments?.length ? payload.segments : payload.sentence_info ?? [];
   return source
@@ -95,7 +125,8 @@ export function normalizeSegments(payload: GatewayTranscript): NormalizedSegment
         end: timeValue(segment, ["end", "end_time", "end_time_milliseconds"]),
         speaker: speaker || undefined,
         text,
-        words: Array.isArray(segment.words) ? segment.words : undefined
+        words: Array.isArray(segment.words) ? segment.words : undefined,
+        speakerMatch: speakerMatchValue(segment)
       };
     })
     .filter((segment): segment is NormalizedSegment => segment !== null);

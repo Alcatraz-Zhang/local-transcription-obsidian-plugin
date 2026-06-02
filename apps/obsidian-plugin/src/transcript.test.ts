@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatTranscript, transcriptText, type NormalizedSegment } from "./transcript";
+import { formatTranscript, normalizeSegments, transcriptText, type NormalizedSegment } from "./transcript";
 
 const segments: NormalizedSegment[] = [
   { start: 0, end: 2.4, speaker: "Speaker1", text: "大家好。" },
@@ -49,5 +49,42 @@ describe("transcriptText", () => {
         "timestamp"
       )
     ).toBe("[00:00:00 - 00:00:01] structured");
+  });
+});
+
+describe("normalizeSegments", () => {
+  it("preserves normalized voiceprint match metadata from sentence_info", () => {
+    expect(
+      normalizeSegments({
+        sentence_info: [
+          {
+            speaker_id: "Speaker1",
+            start_time: 0,
+            end_time: 1.2,
+            text: "hello",
+            speaker_match: {
+              speaker_id: "vp_alice",
+              display_name: "Alice",
+              confidence: 0.87,
+              status: "matched"
+            }
+          }
+        ]
+      })
+    ).toEqual([
+      {
+        start: 0,
+        end: 1.2,
+        speaker: "Speaker1",
+        text: "hello",
+        words: undefined,
+        speakerMatch: {
+          speakerId: "vp_alice",
+          displayName: "Alice",
+          confidence: 0.87,
+          status: "matched"
+        }
+      }
+    ]);
   });
 });
