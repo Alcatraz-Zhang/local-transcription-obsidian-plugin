@@ -1,5 +1,6 @@
 import time
 
+from gateway_app import lifecycle as lifecycle_module
 from gateway_app.lifecycle import BackendLifecycle
 
 
@@ -8,6 +9,7 @@ class FakeProcess:
         self.terminated = False
         self.killed = False
         self.returncode = None
+        self.pid = 1234
 
     def poll(self):
         return self.returncode
@@ -81,3 +83,31 @@ def test_lifecycle_terminates_process_when_ready_check_fails():
 
     assert processes[0].terminated is True
     assert lifecycle.running is False
+
+
+def test_lifecycle_terminates_process_group_on_posix(monkeypatch):
+    process = FakeProcess()
+    signals = []
+
+    def fake_killpg(process_group_id, sig):
+        signals.append((process_group_id, sig))
+        process.returncode = 0
+
+    monkeypatch.setattr(lifecycle_module.os, "name", "posix")
+    monkeypatch.setattr(lifecycle_module.os, "getpgid", lambda pid: 4321, raising=False)
+    monkeypatch.setattr(lifecycle_module.os, "killpg", fake_killpg, raising=False)
+
+    lifecycle = BackendLifecycle(
+        command=["fake"],
+        ready_check=lambda: True,
+        popen=lambda command: process,
+        now=time.monotonic,
+        idle_timeout=0,
+    )
+
+    lifecycle.ensure_ready()
+
+    assert lifecycle.stop_if_idle() is True
+    assert signals == [(4321, lifecycle_module.signal.SIGTERM)]
+    assert process.terminated is False
+    assert process.killed is False

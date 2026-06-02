@@ -3,6 +3,7 @@ services:
     build:
       context: ./services/gateway
     image: obsidian-local-asr-gateway:0.1.0
+    init: true
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-17002}:17002"
     volumes:

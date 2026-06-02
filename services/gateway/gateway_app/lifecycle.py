@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 import threading
 import time
@@ -8,6 +10,7 @@ from typing import Protocol
 
 
 class ManagedProcess(Protocol):
+    pid: int
     returncode: int | None
 
     def poll(self) -> int | None: ...
@@ -43,7 +46,48 @@ class BackendLifecycle:
 
     @staticmethod
     def _default_popen(command: Sequence[str]) -> ManagedProcess:
-        return subprocess.Popen(list(command))
+        kwargs: dict[str, object] = {}
+        if os.name == "nt":
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        else:
+            kwargs["start_new_session"] = True
+        return subprocess.Popen(list(command), **kwargs)
+
+    def _terminate_process_tree(self, process: ManagedProcess) -> None:
+        if process.poll() is not None:
+            return
+
+        used_process_group = False
+        if os.name != "nt":
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                used_process_group = True
+            except ProcessLookupError:
+                return
+            except Exception:
+                used_process_group = False
+
+        if not used_process_group:
+            process.terminate()
+
+        try:
+            process.wait(timeout=self.stop_grace)
+            return
+        except subprocess.TimeoutExpired:
+            pass
+
+        if os.name != "nt":
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                process.wait(timeout=self.stop_grace)
+                return
+            except ProcessLookupError:
+                return
+            except Exception:
+                pass
+
+        process.kill()
+        process.wait(timeout=self.stop_grace)
 
     @property
     def running(self) -> bool:
@@ -73,13 +117,8 @@ class BackendLifecycle:
             with self._lock:
                 process = self._process
                 self._process = None
-            if process is not None and process.poll() is None:
-                process.terminate()
-                try:
-                    process.wait(timeout=self.stop_grace)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait(timeout=self.stop_grace)
+            if process is not None:
+                self._terminate_process_tree(process)
             raise RuntimeError("ASR backend failed to become ready")
 
     def stop_if_idle(self) -> bool:
@@ -92,10 +131,5 @@ class BackendLifecycle:
             self._process = None
 
         assert process is not None
-        process.terminate()
-        try:
-            process.wait(timeout=self.stop_grace)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=self.stop_grace)
+        self._terminate_process_tree(process)
         return True
