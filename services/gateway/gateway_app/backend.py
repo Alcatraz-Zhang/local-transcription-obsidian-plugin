@@ -88,6 +88,14 @@ class QwenBackend:
                 time.sleep(0.5)
         return False
 
+    def ensure_ready(self) -> None:
+        self.lifecycle.ensure_ready()
+
+    def upstream_request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
+        self.ensure_ready()
+        with httpx.Client(timeout=3600) as client:
+            return client.request(method, f"{self.backend_url}{path}", **kwargs)
+
     def transcribe(
         self,
         audio_path: Path,

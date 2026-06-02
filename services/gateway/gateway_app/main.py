@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 
 from .backend import QwenBackend
 from .formatter import normalize_response
+from .voiceprints import create_voiceprint_router
 
 
 def _safe_filename(value: str, default: str = "audio") -> str:
@@ -80,6 +81,7 @@ def create_app(
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.include_router(create_voiceprint_router(backend))
 
     def process_job(job_id: str) -> None:
         job = jobs[job_id]

@@ -38,3 +38,10 @@ def test_qwen_backend_starts_wrapped_child_entrypoint():
     backend = QwenBackend()
 
     assert backend.lifecycle.command == ["/opt/venv/bin/python", "-m", "gateway_app.qwen_child"]
+
+
+def test_qwen_backend_exposes_upstream_proxy_helpers():
+    backend = QwenBackend()
+
+    assert callable(backend.ensure_ready)
+    assert callable(backend.upstream_request)
