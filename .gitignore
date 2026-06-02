@@ -10,4 +10,4 @@ logs/
 temp/
 data/
 *.egg-info/
-
+.worktrees/
