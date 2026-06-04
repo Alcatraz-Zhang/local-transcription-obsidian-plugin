@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { MeetingSpeakerMap } from "./speakers";
 import { formatTranscript, normalizeSegments, transcriptText, type NormalizedSegment } from "./transcript";
 
 const segments: NormalizedSegment[] = [
@@ -49,6 +50,25 @@ describe("transcriptText", () => {
         "timestamp"
       )
     ).toBe("[00:00:00 - 00:00:01] structured");
+  });
+
+  it("renders speaker timestamps with mapped meeting speaker names", () => {
+    const speakerMap: MeetingSpeakerMap = {
+      "说话人1": {
+        displayName: "Alice",
+        source: "manual"
+      }
+    };
+
+    expect(
+      transcriptText(
+        {
+          segments: [{ speaker: "说话人1", start: 0, end: 5, text: "hello" }]
+        },
+        "speaker_timestamp",
+        speakerMap
+      )
+    ).toBe("[00:00:00 - 00:00:05] Alice: hello");
   });
 });
 

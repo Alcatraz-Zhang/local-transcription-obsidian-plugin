@@ -1,3 +1,5 @@
+import { applySpeakerMap, type MeetingSpeakerMap } from "./speakers";
+
 export type OutputMode = "plain" | "timestamp" | "speaker_timestamp";
 
 export interface NormalizedSegment {
@@ -132,10 +134,10 @@ export function normalizeSegments(payload: GatewayTranscript): NormalizedSegment
     .filter((segment): segment is NormalizedSegment => segment !== null);
 }
 
-export function transcriptText(payload: GatewayTranscript, mode: OutputMode): string {
+export function transcriptText(payload: GatewayTranscript, mode: OutputMode, speakerMap?: MeetingSpeakerMap): string {
   const segments = normalizeSegments(payload);
   if (segments.length) {
-    return formatTranscript(segments, mode);
+    return formatTranscript(speakerMap ? applySpeakerMap(segments, speakerMap) : segments, mode);
   }
   return payload.text?.trim() ?? "";
 }
