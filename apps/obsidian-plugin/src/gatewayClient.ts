@@ -7,11 +7,31 @@ export interface GatewayJob {
   error?: string | null;
 }
 
+export interface VoiceprintSpeaker {
+  speaker_id: string;
+  display_name: string;
+  description?: string | null;
+  voiceprint_count?: number;
+}
+
+export interface VoiceprintSampleUploadResult {
+  speaker_id: string;
+  voiceprint_count?: number;
+}
+
+export interface VoiceprintSpeakerList {
+  speakers: VoiceprintSpeaker[];
+}
+
 export class GatewayClient {
   constructor(private readonly gatewayUrl: string) {}
 
+  private baseUrl(): string {
+    return this.gatewayUrl.replace(/\/+$/, "");
+  }
+
   async health(): Promise<unknown> {
-    const response = await fetch(`${this.gatewayUrl.replace(/\/$/, "")}/health`);
+    const response = await fetch(`${this.baseUrl()}/health`);
     if (!response.ok) {
       throw new Error(`Gateway health check failed with HTTP ${response.status}`);
     }
@@ -31,7 +51,7 @@ export class GatewayClient {
     form.append("model", options.model || "auto");
     form.append("output_mode", options.outputMode);
 
-    const response = await fetch(`${this.gatewayUrl.replace(/\/$/, "")}/jobs`, {
+    const response = await fetch(`${this.baseUrl()}/jobs`, {
       method: "POST",
       body: form
     });
@@ -42,9 +62,58 @@ export class GatewayClient {
   }
 
   async getJob(jobId: string): Promise<GatewayJob> {
-    const response = await fetch(`${this.gatewayUrl.replace(/\/$/, "")}/jobs/${jobId}`);
+    const response = await fetch(`${this.baseUrl()}/jobs/${jobId}`);
     if (!response.ok) {
       throw new Error(`Gateway job polling failed with HTTP ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async listVoiceprintSpeakers(): Promise<VoiceprintSpeakerList> {
+    const response = await fetch(`${this.baseUrl()}/voiceprints/speakers`);
+    if (!response.ok) {
+      throw new Error(`Voiceprint speaker list failed with HTTP ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async createVoiceprintSpeaker(options: {
+    displayName: string;
+    description?: string;
+    files: Blob[];
+  }): Promise<VoiceprintSpeaker> {
+    const form = new FormData();
+    form.append("display_name", options.displayName);
+    form.append("description", options.description ?? "");
+    options.files.forEach((file, index) => {
+      form.append("file", file, `voiceprint-${index + 1}.wav`);
+    });
+
+    const response = await fetch(`${this.baseUrl()}/voiceprints/speakers`, {
+      method: "POST",
+      body: form
+    });
+    if (!response.ok) {
+      throw new Error(`Voiceprint speaker creation failed with HTTP ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async addVoiceprintSamples(speakerId: string, files: Blob[]): Promise<VoiceprintSampleUploadResult> {
+    const form = new FormData();
+    files.forEach((file, index) => {
+      form.append("file", file, `voiceprint-sample-${index + 1}.wav`);
+    });
+
+    const response = await fetch(
+      `${this.baseUrl()}/voiceprints/speakers/${encodeURIComponent(speakerId)}/samples`,
+      {
+        method: "POST",
+        body: form
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Voiceprint sample upload failed with HTTP ${response.status}`);
     }
     return response.json();
   }
