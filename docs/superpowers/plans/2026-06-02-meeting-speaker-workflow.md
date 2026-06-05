@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add speaker profiles, voiceprint registration, confidence-based speaker mapping, and safe transcript re-rendering to the local-transcription MVP.
+**Goal:** Add speaker profiles, voiceprint registration, confidence-based speaker mapping, and safe transcript re-rendering to the Local Transcription MVP.
 
 **Architecture:** The plugin owns human-readable speaker profiles, mapping decisions, and note rendering. The gateway only proxies upstream Qwen3-ASR voiceprint APIs and normalizes match metadata. Raw ASR output remains preserved while final Markdown can show real speaker names.
 
@@ -1446,11 +1446,11 @@ Add command:
 ```typescript
 this.addCommand({
   id: "local-transcription-list-speakers",
-  name: "local-transcription: List Speakers",
+  name: "Local Transcription: List Speakers",
   callback: async () => {
     const store = new SpeakerStore(new ObsidianVaultAdapter(this.app), this.pluginSettings.speakerProfilesPath);
     const profiles = await store.load();
-    new Notice(profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No local-transcription speaker profiles yet.");
+    new Notice(profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No Local Transcription speaker profiles yet.");
   }
 });
 ```
@@ -1460,7 +1460,7 @@ Add command:
 ```typescript
 this.addCommand({
   id: "local-transcription-refresh-voiceprint-speakers",
-  name: "local-transcription: Check Voiceprint Speakers",
+  name: "Local Transcription: Check Voiceprint Speakers",
   callback: async () => {
     const client = new GatewayClient(this.pluginSettings.gatewayUrl);
     const speakers = await client.listVoiceprintSpeakers();

@@ -487,7 +487,7 @@ describe("speaker commands", () => {
       }
     ).listSpeakers();
 
-    expect(noticeMessages).toEqual(["Could not load local-transcription speakers: read failed"]);
+    expect(noticeMessages).toEqual(["Could not load Local Transcription speakers: read failed"]);
   });
 
   it("shows a Notice when gateway voiceprint speaker checks fail", async () => {

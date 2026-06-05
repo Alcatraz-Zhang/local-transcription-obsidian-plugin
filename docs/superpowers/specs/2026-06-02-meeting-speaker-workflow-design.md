@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement the next stage of local-transcription as a meeting speaker workflow enhancement. The stage improves real meeting usability by adding speaker profiles, speaker mapping, voiceprint registration, confidence-based matching, and safe transcript re-rendering while keeping the current Qwen3-ASR backend as the default ASR and diarization engine.
+Implement the next stage of Local Transcription as a meeting speaker workflow enhancement. The stage improves real meeting usability by adding speaker profiles, speaker mapping, voiceprint registration, confidence-based matching, and safe transcript re-rendering while keeping the current Qwen3-ASR backend as the default ASR and diarization engine.
 
 ## Scope
 
@@ -121,12 +121,12 @@ Persistence:
 
 Plugin commands:
 
-- `local-transcription: Manage Speakers`
+- `Local Transcription: Manage Speakers`
   - Create, rename, and delete vault speaker profiles.
   - Bind or unbind gateway voiceprint speaker ids.
   - Upload or record reference voiceprint audio.
 
-- `local-transcription: Review Speaker Mapping`
+- `Local Transcription: Review Speaker Mapping`
   - Review the current note or latest task.
   - Apply `说话人N -> displayName` mappings.
   - Merge temporary speaker labels.

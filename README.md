@@ -1,4 +1,4 @@
-# local-transcription
+# Local Transcription
 
 Local-first Obsidian meeting transcription with a Dockerized ASR gateway, timestamped speaker output, long-audio jobs, and idle GPU release.
 

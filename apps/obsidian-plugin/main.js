@@ -854,7 +854,7 @@ var StatusModal = class extends import_obsidian.Modal {
   statusEl;
   onOpen() {
     this.contentEl.empty();
-    this.contentEl.createEl("h2", { text: "local-transcription" });
+    this.contentEl.createEl("h2", { text: "Local Transcription" });
     this.statusEl = this.contentEl.createEl("pre", {
       cls: "local-transcription-status",
       text: this.status
@@ -897,15 +897,15 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     });
     this.addCommand({
       id: "local-transcription-list-speakers",
-      name: "local-transcription: List Speakers",
+      name: "Local Transcription: List Speakers",
       callback: () => this.listSpeakers()
     });
     this.addCommand({
       id: "local-transcription-refresh-voiceprint-speakers",
-      name: "local-transcription: Check Voiceprint Speakers",
+      name: "Local Transcription: Check Voiceprint Speakers",
       callback: () => this.checkVoiceprintSpeakers()
     });
-    this.addRibbonIcon("mic", "local-transcription", () => this.pickAndTranscribeFile());
+    this.addRibbonIcon("mic", "Local Transcription", () => this.pickAndTranscribeFile());
   }
   async saveSettings() {
     await this.saveData(this.pluginSettings);
@@ -935,10 +935,10 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     try {
       const profiles = await this.speakerStore().load();
       new import_obsidian.Notice(
-        profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No local-transcription speaker profiles yet."
+        profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No Local Transcription speaker profiles yet."
       );
     } catch (error) {
-      new import_obsidian.Notice(`Could not load local-transcription speakers: ${errorMessage(error)}`);
+      new import_obsidian.Notice(`Could not load Local Transcription speakers: ${errorMessage(error)}`);
     }
   }
   async checkVoiceprintSpeakers() {
@@ -1113,7 +1113,7 @@ var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTa
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "local-transcription" });
+    containerEl.createEl("h2", { text: "Local Transcription" });
     new import_obsidian.Setting(containerEl).setName("Gateway URL").addText(
       (text) => text.setValue(this.plugin.pluginSettings.gatewayUrl).onChange(async (value) => {
         this.plugin.pluginSettings.gatewayUrl = value.trim();
