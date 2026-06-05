@@ -6,7 +6,7 @@ Local-first Obsidian meeting transcription with a Dockerized ASR gateway, timest
 
 ```text
 Obsidian plugin
-  -> http://localhost:17002
+  -> http://localhost:17003
   -> gateway container
       -> FastAPI gateway stays alive
       -> Qwen3-ASR child process starts on demand
@@ -54,14 +54,14 @@ docker compose up
 Health check:
 
 ```powershell
-curl.exe http://localhost:17002/health
+curl.exe http://localhost:17003/health
 ```
 
 Check GPU release around a job:
 
 ```powershell
 nvidia-smi
-curl.exe http://localhost:17002/health
+curl.exe http://localhost:17003/health
 nvidia-smi
 ```
 

@@ -118,7 +118,7 @@ var GatewayClient = class {
 // src/settings.ts
 var POST_PROCESSING_SECRET_ID = "local-asr-gateway-post-processing-api-key";
 var DEFAULT_SETTINGS = {
-  gatewayUrl: "http://localhost:17002",
+  gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
   transcriptSavePath: "Recordings/Transcripts",
   speakerProfilesPath: ".local-asr/speakers.json",

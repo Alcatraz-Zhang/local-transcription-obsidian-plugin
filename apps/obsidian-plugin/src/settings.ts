@@ -22,7 +22,7 @@ export interface LocalAsrSettings {
 export const POST_PROCESSING_SECRET_ID = "local-asr-gateway-post-processing-api-key";
 
 export const DEFAULT_SETTINGS: LocalAsrSettings = {
-  gatewayUrl: "http://localhost:17002",
+  gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
   transcriptSavePath: "Recordings/Transcripts",
   speakerProfilesPath: ".local-asr/speakers.json",

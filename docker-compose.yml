@@ -5,14 +5,14 @@ services:
     image: obsidian-local-asr-gateway:0.1.0
     init: true
     ports:
-      - "127.0.0.1:${GATEWAY_PORT:-17002}:17002"
+      - "127.0.0.1:${GATEWAY_PORT:-17003}:17003"
     volumes:
       - asr-huggingface:/root/.cache/huggingface
       - asr-modelscope:/root/.cache/modelscope
       - asr-data:/data
       - asr-logs:/logs
     environment:
-      GATEWAY_PORT: 17002
+      GATEWAY_PORT: 17003
       IDLE_TIMEOUT: ${IDLE_TIMEOUT:-300}
       ASR_READY_TIMEOUT: ${ASR_READY_TIMEOUT:-1800}
       ASR_MODEL: ${ASR_MODEL:-auto}

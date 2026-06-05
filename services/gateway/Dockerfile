@@ -2,7 +2,7 @@ FROM quantatrisk/qwen3-asr:gpu-latest AS gateway
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    GATEWAY_PORT=17002 \
+    GATEWAY_PORT=17003 \
     IDLE_TIMEOUT=300
 
 WORKDIR /app
@@ -17,5 +17,5 @@ ENV PYTHONPATH=/gateway:/app \
     MODELSCOPE_CACHE=/root/.cache/modelscope \
     HF_HUB_DISABLE_XET=1
 
-EXPOSE 17002
+EXPOSE 17003
 CMD ["/opt/venv/bin/python", "-m", "gateway_app"]
