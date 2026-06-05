@@ -1,6 +1,6 @@
 import { normalizeSpeakerIdentity, type SpeakerProfile } from "./speakers";
 
-export const SPEAKER_PROFILE_PATH = ".local-asr/speakers.json";
+export const SPEAKER_PROFILE_PATH = ".local-transcription/speakers.json";
 
 export type SpeakerStoreLoadStatus = "ok" | "missing" | "invalid" | "partial";
 

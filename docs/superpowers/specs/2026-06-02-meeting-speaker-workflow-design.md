@@ -2,7 +2,7 @@
 
 ## Goal
 
-Implement the next stage of Obsidian Local ASR Gateway as a meeting speaker workflow enhancement. The stage improves real meeting usability by adding speaker profiles, speaker mapping, voiceprint registration, confidence-based matching, and safe transcript re-rendering while keeping the current Qwen3-ASR backend as the default ASR and diarization engine.
+Implement the next stage of local-transcription as a meeting speaker workflow enhancement. The stage improves real meeting usability by adding speaker profiles, speaker mapping, voiceprint registration, confidence-based matching, and safe transcript re-rendering while keeping the current Qwen3-ASR backend as the default ASR and diarization engine.
 
 ## Scope
 
@@ -114,19 +114,19 @@ Meeting speaker map:
 
 Persistence:
 
-- Global speaker profiles are stored in `.local-asr/speakers.json`.
-- Meeting speaker maps are stored in note frontmatter under `local_asr_speakers` when small enough.
+- Global speaker profiles are stored in `.local-transcription/speakers.json`.
+- Meeting speaker maps are stored in note frontmatter under `local_transcription_speakers` when small enough.
 - Large speaker maps are stored as a same-directory `.speaker-map.json` sidecar.
 - Raw ASR JSON is preserved and is never overwritten by speaker rename or merge operations.
 
 Plugin commands:
 
-- `Local ASR: Manage Speakers`
+- `local-transcription: Manage Speakers`
   - Create, rename, and delete vault speaker profiles.
   - Bind or unbind gateway voiceprint speaker ids.
   - Upload or record reference voiceprint audio.
 
-- `Local ASR: Review Speaker Mapping`
+- `local-transcription: Review Speaker Mapping`
   - Review the current note or latest task.
   - Apply `说话人N -> displayName` mappings.
   - Merge temporary speaker labels.

@@ -73,7 +73,7 @@ def create_app(
         finally:
             stop_idle_monitor.set()
 
-    app = FastAPI(title="Obsidian Local ASR Gateway", lifespan=lifespan)
+    app = FastAPI(title="local-transcription", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

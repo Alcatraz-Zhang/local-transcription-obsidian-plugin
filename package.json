@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-local-asr-gateway",
+  "name": "local-transcription",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -7,9 +7,8 @@
   ],
   "scripts": {
     "test": "npm run test:plugin && npm run test:gateway",
-    "test:plugin": "npm run test -w @local-asr/obsidian-plugin",
+    "test:plugin": "npm run test -w @local-transcription/obsidian-plugin",
     "test:gateway": "python -m pytest services/gateway/tests -q",
-    "build": "npm run build -w @local-asr/obsidian-plugin"
+    "build": "npm run build -w @local-transcription/obsidian-plugin"
   }
 }
-

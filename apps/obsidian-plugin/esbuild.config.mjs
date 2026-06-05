@@ -6,7 +6,7 @@ const production = process.argv[2] === "production";
 
 const context = await esbuild.context({
   banner: {
-    js: "/* Obsidian Local ASR Gateway */"
+    js: "/* local-transcription */"
   },
   entryPoints: ["src/main.ts"],
   bundle: true,
@@ -40,4 +40,3 @@ if (production) {
 } else {
   await context.watch();
 }
-

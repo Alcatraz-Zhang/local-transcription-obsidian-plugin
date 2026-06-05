@@ -1,8 +1,10 @@
+name: local-transcription
+
 services:
   asr-gateway:
     build:
       context: ./services/gateway
-    image: obsidian-local-asr-gateway:0.1.0
+    image: local-transcription:0.1.0
     init: true
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-17003}:17003"

@@ -1,5 +1,5 @@
 {
-  "name": "@local-asr/obsidian-plugin",
+  "name": "@local-transcription/obsidian-plugin",
   "version": "0.1.0",
   "private": true,
   "main": "main.js",

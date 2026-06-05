@@ -1,4 +1,4 @@
-# Obsidian Local ASR Gateway
+# local-transcription
 
 Local-first Obsidian meeting transcription with a Dockerized ASR gateway, timestamped speaker output, long-audio jobs, and idle GPU release.
 
@@ -110,7 +110,7 @@ The gateway does not inject this formatted transcript into `text`. It returns st
 
 ## Speaker Workflow
 
-Human-readable speaker profiles are stored in the vault at `.local-asr/speakers.json`.
+Human-readable speaker profiles are stored in the vault at `.local-transcription/speakers.json`.
 Gateway voiceprint embeddings are stored separately in the Docker `/data` volume.
 
 Confidence handling is intentionally simple: matches at `>=0.85` are auto-applied,

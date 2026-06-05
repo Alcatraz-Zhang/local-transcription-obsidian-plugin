@@ -1,6 +1,6 @@
 import type { OutputMode } from "./transcript";
 
-export interface LocalAsrSettings {
+export interface LocalTranscriptionSettings {
   gatewayUrl: string;
   audioSavePath: string;
   transcriptSavePath: string;
@@ -19,13 +19,13 @@ export interface LocalAsrSettings {
   keepOriginalTranscription: boolean;
 }
 
-export const POST_PROCESSING_SECRET_ID = "local-asr-gateway-post-processing-api-key";
+export const POST_PROCESSING_SECRET_ID = "local-transcription-post-processing-api-key";
 
-export const DEFAULT_SETTINGS: LocalAsrSettings = {
+export const DEFAULT_SETTINGS: LocalTranscriptionSettings = {
   gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
   transcriptSavePath: "Recordings/Transcripts",
-  speakerProfilesPath: ".local-asr/speakers.json",
+  speakerProfilesPath: ".local-transcription/speakers.json",
   autoApplySpeakerConfidence: 0.85,
   suggestSpeakerConfidence: 0.65,
   noteFilenameTemplate: "{{datetime}} - {{title}}",

@@ -1,4 +1,4 @@
-/* Obsidian Local ASR Gateway */
+/* local-transcription */
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -21,7 +21,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var main_exports = {};
 __export(main_exports, {
   ObsidianVaultAdapter: () => ObsidianVaultAdapter,
-  default: () => LocalAsrGatewayPlugin
+  default: () => LocalTranscriptionPlugin
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian = require("obsidian");
@@ -116,12 +116,12 @@ var GatewayClient = class {
 };
 
 // src/settings.ts
-var POST_PROCESSING_SECRET_ID = "local-asr-gateway-post-processing-api-key";
+var POST_PROCESSING_SECRET_ID = "local-transcription-post-processing-api-key";
 var DEFAULT_SETTINGS = {
   gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
   transcriptSavePath: "Recordings/Transcripts",
-  speakerProfilesPath: ".local-asr/speakers.json",
+  speakerProfilesPath: ".local-transcription/speakers.json",
   autoApplySpeakerConfidence: 0.85,
   suggestSpeakerConfidence: 0.65,
   noteFilenameTemplate: "{{datetime}} - {{title}}",
@@ -428,7 +428,7 @@ async function postProcessTranscript(options) {
 }
 
 // src/speakerStore.ts
-var SPEAKER_PROFILE_PATH = ".local-asr/speakers.json";
+var SPEAKER_PROFILE_PATH = ".local-transcription/speakers.json";
 function isNonblankString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
@@ -721,7 +721,7 @@ var SpeakerStore = class {
 // src/noteArtifacts.ts
 var SPEAKER_SIDECAR_THRESHOLD_BYTES = 4096;
 function buildSpeakerFrontmatter(speakerMap) {
-  return { local_asr_speakers: speakerMap };
+  return { local_transcription_speakers: speakerMap };
 }
 function scalarValue(value) {
   if (value === null) {
@@ -854,9 +854,9 @@ var StatusModal = class extends import_obsidian.Modal {
   statusEl;
   onOpen() {
     this.contentEl.empty();
-    this.contentEl.createEl("h2", { text: "Local ASR Gateway" });
+    this.contentEl.createEl("h2", { text: "local-transcription" });
     this.statusEl = this.contentEl.createEl("pre", {
-      cls: "local-asr-status",
+      cls: "local-transcription-status",
       text: this.status
     });
   }
@@ -867,14 +867,14 @@ var StatusModal = class extends import_obsidian.Modal {
     }
   }
 };
-var LocalAsrGatewayPlugin = class extends import_obsidian.Plugin {
+var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
   pluginSettings;
   recorder = null;
   chunks = [];
   statusModal = null;
   async onload() {
     this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    this.addSettingTab(new LocalAsrSettingTab(this.app, this));
+    this.addSettingTab(new LocalTranscriptionSettingTab(this.app, this));
     this.addCommand({
       id: "upload-audio-file",
       name: "Upload audio file for transcription",
@@ -896,16 +896,16 @@ var LocalAsrGatewayPlugin = class extends import_obsidian.Plugin {
       callback: () => this.testGatewayHealth()
     });
     this.addCommand({
-      id: "local-asr-list-speakers",
-      name: "Local ASR: List Speakers",
+      id: "local-transcription-list-speakers",
+      name: "local-transcription: List Speakers",
       callback: () => this.listSpeakers()
     });
     this.addCommand({
-      id: "local-asr-refresh-voiceprint-speakers",
-      name: "Local ASR: Check Voiceprint Speakers",
+      id: "local-transcription-refresh-voiceprint-speakers",
+      name: "local-transcription: Check Voiceprint Speakers",
       callback: () => this.checkVoiceprintSpeakers()
     });
-    this.addRibbonIcon("mic", "Local ASR Gateway", () => this.pickAndTranscribeFile());
+    this.addRibbonIcon("mic", "local-transcription", () => this.pickAndTranscribeFile());
   }
   async saveSettings() {
     await this.saveData(this.pluginSettings);
@@ -935,10 +935,10 @@ var LocalAsrGatewayPlugin = class extends import_obsidian.Plugin {
     try {
       const profiles = await this.speakerStore().load();
       new import_obsidian.Notice(
-        profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No Local ASR speaker profiles yet."
+        profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No local-transcription speaker profiles yet."
       );
     } catch (error) {
-      new import_obsidian.Notice(`Could not load Local ASR speakers: ${errorMessage(error)}`);
+      new import_obsidian.Notice(`Could not load local-transcription speakers: ${errorMessage(error)}`);
     }
   }
   async checkVoiceprintSpeakers() {
@@ -1074,7 +1074,7 @@ ${JSON.stringify(job, null, 2)}`);
     const speakerMapContent = `${JSON.stringify(speakerMap, null, 2)}
 `;
     const speakerMapSidecarPath = shouldUseSpeakerSidecar(speakerMap) ? await this.availablePath(speakerSidecarPath(notePath)) : void 0;
-    const frontmatter = speakerMapSidecarPath ? { local_asr_speaker_map: speakerMapSidecarPath } : buildSpeakerFrontmatter(speakerMap);
+    const frontmatter = speakerMapSidecarPath ? { local_transcription_speaker_map: speakerMapSidecarPath } : buildSpeakerFrontmatter(speakerMap);
     const content = prependSpeakerFrontmatter(
       expandTemplate(this.pluginSettings.noteTemplate, variables).trim() + "\n",
       frontmatter
@@ -1105,7 +1105,7 @@ ${JSON.stringify(job, null, 2)}`);
     throw new Error(`Could not find available path for ${path}`);
   }
 };
-var LocalAsrSettingTab = class extends import_obsidian.PluginSettingTab {
+var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -1113,7 +1113,7 @@ var LocalAsrSettingTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Local ASR Gateway" });
+    containerEl.createEl("h2", { text: "local-transcription" });
     new import_obsidian.Setting(containerEl).setName("Gateway URL").addText(
       (text) => text.setValue(this.plugin.pluginSettings.gatewayUrl).onChange(async (value) => {
         this.plugin.pluginSettings.gatewayUrl = value.trim();

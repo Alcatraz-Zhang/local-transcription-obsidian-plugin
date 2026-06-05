@@ -3,17 +3,17 @@ import type { MeetingSpeakerMap } from "./speakers";
 export const SPEAKER_SIDECAR_THRESHOLD_BYTES = 4096;
 
 export interface SpeakerFrontmatter {
-  local_asr_speakers: MeetingSpeakerMap;
+  local_transcription_speakers: MeetingSpeakerMap;
 }
 
 export interface SpeakerSidecarFrontmatter {
-  local_asr_speaker_map: string;
+  local_transcription_speaker_map: string;
 }
 
 export type NoteFrontmatter = SpeakerFrontmatter | SpeakerSidecarFrontmatter;
 
 export function buildSpeakerFrontmatter(speakerMap: MeetingSpeakerMap): SpeakerFrontmatter {
-  return { local_asr_speakers: speakerMap };
+  return { local_transcription_speakers: speakerMap };
 }
 
 function scalarValue(value: unknown): string | undefined {

@@ -14,7 +14,7 @@ import { GatewayClient, type GatewayJob } from "./gatewayClient";
 import {
   DEFAULT_SETTINGS,
   POST_PROCESSING_SECRET_ID,
-  type LocalAsrSettings
+  type LocalTranscriptionSettings
 } from "./settings";
 import { expandTemplate, defaultTitleFromFile, safeNoteFileName } from "./template";
 import { normalizeSegments, transcriptText } from "./transcript";
@@ -100,9 +100,9 @@ class StatusModal extends Modal {
 
   onOpen(): void {
     this.contentEl.empty();
-    this.contentEl.createEl("h2", { text: "Local ASR Gateway" });
+    this.contentEl.createEl("h2", { text: "local-transcription" });
     this.statusEl = this.contentEl.createEl("pre", {
-      cls: "local-asr-status",
+      cls: "local-transcription-status",
       text: this.status
     });
   }
@@ -115,15 +115,15 @@ class StatusModal extends Modal {
   }
 }
 
-export default class LocalAsrGatewayPlugin extends Plugin {
-  pluginSettings: LocalAsrSettings;
+export default class LocalTranscriptionPlugin extends Plugin {
+  pluginSettings: LocalTranscriptionSettings;
   private recorder: MediaRecorder | null = null;
   private chunks: Blob[] = [];
   private statusModal: StatusModal | null = null;
 
   async onload(): Promise<void> {
     this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-    this.addSettingTab(new LocalAsrSettingTab(this.app, this));
+    this.addSettingTab(new LocalTranscriptionSettingTab(this.app, this));
 
     this.addCommand({
       id: "upload-audio-file",
@@ -146,16 +146,16 @@ export default class LocalAsrGatewayPlugin extends Plugin {
       callback: () => this.testGatewayHealth()
     });
     this.addCommand({
-      id: "local-asr-list-speakers",
-      name: "Local ASR: List Speakers",
+      id: "local-transcription-list-speakers",
+      name: "local-transcription: List Speakers",
       callback: () => this.listSpeakers()
     });
     this.addCommand({
-      id: "local-asr-refresh-voiceprint-speakers",
-      name: "Local ASR: Check Voiceprint Speakers",
+      id: "local-transcription-refresh-voiceprint-speakers",
+      name: "local-transcription: Check Voiceprint Speakers",
       callback: () => this.checkVoiceprintSpeakers()
     });
-    this.addRibbonIcon("mic", "Local ASR Gateway", () => this.pickAndTranscribeFile());
+    this.addRibbonIcon("mic", "local-transcription", () => this.pickAndTranscribeFile());
   }
 
   async saveSettings(): Promise<void> {
@@ -194,10 +194,10 @@ export default class LocalAsrGatewayPlugin extends Plugin {
       new Notice(
         profiles.length
           ? profiles.map((profile) => profile.displayName).join(", ")
-          : "No Local ASR speaker profiles yet."
+          : "No local-transcription speaker profiles yet."
       );
     } catch (error) {
-      new Notice(`Could not load Local ASR speakers: ${errorMessage(error)}`);
+      new Notice(`Could not load local-transcription speakers: ${errorMessage(error)}`);
     }
   }
 
@@ -344,7 +344,7 @@ export default class LocalAsrGatewayPlugin extends Plugin {
       ? await this.availablePath(speakerSidecarPath(notePath))
       : undefined;
     const frontmatter = speakerMapSidecarPath
-      ? { local_asr_speaker_map: speakerMapSidecarPath }
+      ? { local_transcription_speaker_map: speakerMapSidecarPath }
       : buildSpeakerFrontmatter(speakerMap);
     const content = prependSpeakerFrontmatter(
       expandTemplate(this.pluginSettings.noteTemplate, variables).trim() + "\n",
@@ -379,15 +379,15 @@ export default class LocalAsrGatewayPlugin extends Plugin {
   }
 }
 
-class LocalAsrSettingTab extends PluginSettingTab {
-  constructor(app: App, private plugin: LocalAsrGatewayPlugin) {
+class LocalTranscriptionSettingTab extends PluginSettingTab {
+  constructor(app: App, private plugin: LocalTranscriptionPlugin) {
     super(app, plugin);
   }
 
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Local ASR Gateway" });
+    containerEl.createEl("h2", { text: "local-transcription" });
 
     new Setting(containerEl)
       .setName("Gateway URL")
@@ -422,7 +422,7 @@ class LocalAsrSettingTab extends PluginSettingTab {
           .addOption("speaker_timestamp", "Timestamp + speaker")
           .setValue(this.plugin.pluginSettings.outputMode)
           .onChange(async (value) => {
-            this.plugin.pluginSettings.outputMode = value as LocalAsrSettings["outputMode"];
+            this.plugin.pluginSettings.outputMode = value as LocalTranscriptionSettings["outputMode"];
             await this.plugin.saveSettings();
           })
       );

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add speaker profiles, voiceprint registration, confidence-based speaker mapping, and safe transcript re-rendering to the Obsidian Local ASR Gateway MVP.
+**Goal:** Add speaker profiles, voiceprint registration, confidence-based speaker mapping, and safe transcript re-rendering to the local-transcription MVP.
 
 **Architecture:** The plugin owns human-readable speaker profiles, mapping decisions, and note rendering. The gateway only proxies upstream Qwen3-ASR voiceprint APIs and normalizes match metadata. Raw ASR output remains preserved while final Markdown can show real speaker names.
 
@@ -46,7 +46,7 @@ Plugin files:
 - Create `apps/obsidian-plugin/src/speakers.test.ts`
   - Tests confidence and mapping behavior.
 - Create `apps/obsidian-plugin/src/speakerStore.ts`
-  - Reads and writes `.local-asr/speakers.json`.
+  - Reads and writes `.local-transcription/speakers.json`.
 - Create `apps/obsidian-plugin/src/speakerStore.test.ts`
   - Tests storage through a small fake vault adapter.
 - Create `apps/obsidian-plugin/src/noteArtifacts.ts`
@@ -582,7 +582,7 @@ Update `normalizeSegments()` return object:
 
 ```powershell
 python -m pytest services/gateway/tests/test_formatter.py -q
-npm run test -w @local-asr/obsidian-plugin -- transcript
+npm run test -w @local-transcription/obsidian-plugin -- transcript
 ```
 
 Expected: both pass.
@@ -745,7 +745,7 @@ describe("speaker map application", () => {
 - [ ] **Step 2: Run tests to verify failure**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- speakers
+npm run test -w @local-transcription/obsidian-plugin -- speakers
 ```
 
 Expected: fails because `speakers.ts` does not exist.
@@ -899,7 +899,7 @@ export function createSpeakerProfile(displayName: string, gatewaySpeakerId?: str
 - [ ] **Step 4: Run speaker tests**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- speakers
+npm run test -w @local-transcription/obsidian-plugin -- speakers
 ```
 
 Expected: pass.
@@ -975,7 +975,7 @@ describe("SpeakerStore", () => {
 
   it("rejects malformed profile JSON by returning an empty list", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", "{broken");
+    adapter.files.set(".local-transcription/speakers.json", "{broken");
     const store = new SpeakerStore(adapter);
 
     await expect(store.load()).resolves.toEqual([]);
@@ -986,7 +986,7 @@ describe("SpeakerStore", () => {
 - [ ] **Step 2: Run test to verify failure**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- speakerStore
+npm run test -w @local-transcription/obsidian-plugin -- speakerStore
 ```
 
 Expected: fails because `speakerStore.ts` does not exist.
@@ -998,7 +998,7 @@ Create `apps/obsidian-plugin/src/speakerStore.ts`:
 ```typescript
 import type { SpeakerProfile } from "./speakers";
 
-export const SPEAKER_PROFILE_PATH = ".local-asr/speakers.json";
+export const SPEAKER_PROFILE_PATH = ".local-transcription/speakers.json";
 
 export interface VaultAdapter {
   read(path: string): Promise<string | null>;
@@ -1049,7 +1049,7 @@ export class SpeakerStore {
 - [ ] **Step 4: Run store tests**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- speakerStore
+npm run test -w @local-transcription/obsidian-plugin -- speakerStore
 ```
 
 Expected: pass.
@@ -1130,7 +1130,7 @@ describe("GatewayClient voiceprints", () => {
 - [ ] **Step 2: Run client tests to verify failure**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- gatewayClient
+npm run test -w @local-transcription/obsidian-plugin -- gatewayClient
 ```
 
 Expected: fails because methods are missing.
@@ -1199,7 +1199,7 @@ Add methods inside `GatewayClient`:
 - [ ] **Step 4: Run client tests**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- gatewayClient
+npm run test -w @local-transcription/obsidian-plugin -- gatewayClient
 ```
 
 Expected: pass.
@@ -1255,7 +1255,7 @@ describe("note speaker artifacts", () => {
       "说话人1": { displayName: "Alice", source: "manual" }
     });
 
-    expect(frontmatter.local_asr_speakers["说话人1"].displayName).toBe("Alice");
+    expect(frontmatter.local_transcription_speakers["说话人1"].displayName).toBe("Alice");
   });
 
   it("uses sidecar for large speaker maps", () => {
@@ -1274,7 +1274,7 @@ describe("note speaker artifacts", () => {
 - [ ] **Step 3: Run tests to verify failure**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- transcript noteArtifacts
+npm run test -w @local-transcription/obsidian-plugin -- transcript noteArtifacts
 ```
 
 Expected: fails because `transcriptText` has no speaker map parameter and `noteArtifacts.ts` does not exist.
@@ -1309,12 +1309,12 @@ import type { MeetingSpeakerMap } from "./speakers";
 export const SPEAKER_SIDECAR_THRESHOLD_BYTES = 4096;
 
 export interface SpeakerFrontmatter {
-  local_asr_speakers: MeetingSpeakerMap;
+  local_transcription_speakers: MeetingSpeakerMap;
 }
 
 export function buildSpeakerFrontmatter(speakerMap: MeetingSpeakerMap): SpeakerFrontmatter {
   return {
-    local_asr_speakers: speakerMap
+    local_transcription_speakers: speakerMap
   };
 }
 
@@ -1330,7 +1330,7 @@ export function speakerSidecarPath(notePath: string): string {
 - [ ] **Step 6: Run note artifact and transcript tests**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin -- transcript noteArtifacts
+npm run test -w @local-transcription/obsidian-plugin -- transcript noteArtifacts
 ```
 
 Expected: pass.
@@ -1356,7 +1356,7 @@ git commit -m "feat: render transcripts with speaker maps"
 Modify `apps/obsidian-plugin/src/settings.ts`:
 
 ```typescript
-export interface LocalAsrSettings {
+export interface LocalTranscriptionSettings {
   gatewayUrl: string;
   audioSavePath: string;
   transcriptSavePath: string;
@@ -1379,7 +1379,7 @@ export interface LocalAsrSettings {
 Add defaults:
 
 ```typescript
-  speakerProfilesPath: ".local-asr/speakers.json",
+  speakerProfilesPath: ".local-transcription/speakers.json",
   autoApplySpeakerConfidence: 0.85,
   suggestSpeakerConfidence: 0.65
 ```
@@ -1445,12 +1445,12 @@ Add command:
 
 ```typescript
 this.addCommand({
-  id: "local-asr-list-speakers",
-  name: "Local ASR: List Speakers",
+  id: "local-transcription-list-speakers",
+  name: "local-transcription: List Speakers",
   callback: async () => {
     const store = new SpeakerStore(new ObsidianVaultAdapter(this.app), this.pluginSettings.speakerProfilesPath);
     const profiles = await store.load();
-    new Notice(profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No Local ASR speaker profiles yet.");
+    new Notice(profiles.length ? profiles.map((profile) => profile.displayName).join(", ") : "No local-transcription speaker profiles yet.");
   }
 });
 ```
@@ -1459,8 +1459,8 @@ Add command:
 
 ```typescript
 this.addCommand({
-  id: "local-asr-refresh-voiceprint-speakers",
-  name: "Local ASR: Check Voiceprint Speakers",
+  id: "local-transcription-refresh-voiceprint-speakers",
+  name: "local-transcription: Check Voiceprint Speakers",
   callback: async () => {
     const client = new GatewayClient(this.pluginSettings.gatewayUrl);
     const speakers = await client.listVoiceprintSpeakers();
@@ -1478,7 +1478,7 @@ Add a section:
 ```markdown
 ## Speaker Workflow
 
-The plugin stores human-readable speaker profiles in `.local-asr/speakers.json`.
+The plugin stores human-readable speaker profiles in `.local-transcription/speakers.json`.
 Gateway voiceprint embeddings are stored in the Docker `/data` volume.
 
 Speaker matching is confidence-based:
@@ -1493,7 +1493,7 @@ Raw ASR JSON is preserved beside generated notes so speaker re-rendering never d
 - [ ] **Step 6: Run plugin tests and build**
 
 ```powershell
-npm run test -w @local-asr/obsidian-plugin
+npm run test -w @local-transcription/obsidian-plugin
 npm run build
 ```
 

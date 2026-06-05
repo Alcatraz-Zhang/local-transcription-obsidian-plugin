@@ -19,7 +19,7 @@ describe("noteArtifacts", () => {
     };
 
     expect(buildSpeakerFrontmatter(speakerMap)).toEqual({
-      local_asr_speakers: speakerMap
+      local_transcription_speakers: speakerMap
     });
     expect(shouldUseSpeakerSidecar(speakerMap)).toBe(false);
   });
@@ -39,7 +39,7 @@ describe("noteArtifacts", () => {
     expect(speakerFrontmatterBlock(buildSpeakerFrontmatter(speakerMap))).toBe(
       [
         "---",
-        "local_asr_speakers:",
+        "local_transcription_speakers:",
         '  "\u8bf4\u8bdd\u4eba1":',
         '    displayName: "Alice"',
         '    source: "auto_high_confidence"',
@@ -64,7 +64,7 @@ describe("noteArtifacts", () => {
     expect(prependSpeakerFrontmatter("Body\n", buildSpeakerFrontmatter(speakerMap))).toBe(
       [
         "---",
-        "local_asr_speakers:",
+        "local_transcription_speakers:",
         '  "Speaker1":',
         '    displayName: "Alice"',
         '    source: "manual"',

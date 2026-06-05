@@ -1,10 +1,9 @@
 {
-  "id": "local-asr-gateway",
-  "name": "Local ASR Gateway",
+  "id": "local-transcription",
+  "name": "local-transcription",
   "version": "0.1.0",
   "minAppVersion": "1.5.0",
   "description": "Local-first meeting transcription for Obsidian with timestamped speaker notes and a Docker ASR gateway.",
   "author": "Hans",
   "isDesktopOnly": true
 }
-

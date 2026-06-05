@@ -1,2 +1,1 @@
-"""Obsidian Local ASR Gateway."""
-
+"""local-transcription gateway."""

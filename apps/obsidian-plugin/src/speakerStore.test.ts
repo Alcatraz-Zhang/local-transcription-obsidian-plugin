@@ -43,7 +43,7 @@ describe("SpeakerStore", () => {
 
   it("reports invalid status for an existing empty profile file while load still returns an empty list", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", " \n\t");
+    adapter.files.set(".local-transcription/speakers.json", " \n\t");
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({ status: "invalid", profiles: [] });
@@ -65,8 +65,8 @@ describe("SpeakerStore", () => {
 
     await store.save([validProfile]);
 
-    expect(adapter.ensuredFolders).toEqual([".local-asr"]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(true);
+    expect(adapter.ensuredFolders).toEqual([".local-transcription"]);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(true);
   });
 
   it("ensures a custom parent folder before writing", async () => {
@@ -102,7 +102,7 @@ describe("SpeakerStore", () => {
   it("filters profiles with non-string aliases or gateway speaker IDs", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([
         {
           id: "vault-speaker-alice",
@@ -157,7 +157,7 @@ describe("SpeakerStore", () => {
       aliases: ["Designer"],
       gatewaySpeakerId: "vp_bob"
     };
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile, duplicate, bob]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile, duplicate, bob]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({
@@ -177,7 +177,7 @@ describe("SpeakerStore", () => {
       aliases: ["Alice Copy"],
       gatewaySpeakerId: "vp_alice_copy"
     };
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile, duplicate]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile, duplicate]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({
@@ -196,7 +196,7 @@ describe("SpeakerStore", () => {
       displayName: "Bob",
       aliases: ["Designer"]
     };
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile, duplicateGateway]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile, duplicateGateway]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({
@@ -223,7 +223,7 @@ describe("SpeakerStore", () => {
       aliases: ["Designer"],
       gatewaySpeakerId: "vp_a"
     };
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([upperGateway, lowerGateway]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([upperGateway, lowerGateway]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({
@@ -235,7 +235,7 @@ describe("SpeakerStore", () => {
   it("trims persisted speaker identity fields when loading", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([
         {
           ...validProfile,
@@ -276,7 +276,7 @@ describe("SpeakerStore", () => {
       gatewaySpeakerId: "vp_caro"
     };
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([validProfile, displayNameCollidesWithAlias, aliasCollidesWithDisplayName])
     );
     const store = new SpeakerStore(adapter);
@@ -295,7 +295,7 @@ describe("SpeakerStore", () => {
   it("reports invalid status when a stored profile alias equals its display name", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([{ ...validProfile, aliases: [" alice "] }])
     );
     const store = new SpeakerStore(adapter);
@@ -311,7 +311,7 @@ describe("SpeakerStore", () => {
   it("strips extra persisted fields from valid profiles when loading", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([{ ...validProfile, runtimeSpeakerMatch: { confidence: 0.9 }, extra: true }])
     );
     const store = new SpeakerStore(adapter);
@@ -326,7 +326,7 @@ describe("SpeakerStore", () => {
     await expect(missingStore.loadEditable()).resolves.toEqual([]);
 
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadEditable()).resolves.toEqual([validProfile]);
@@ -334,7 +334,7 @@ describe("SpeakerStore", () => {
 
   it("loadEditable throws for partial storage so write flows cannot ignore invalid entries", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile, { ...validProfile, id: "" }]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile, { ...validProfile, id: "" }]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadEditable()).rejects.toThrow(
@@ -345,7 +345,7 @@ describe("SpeakerStore", () => {
   it("loadEditable throws for duplicate-id storage through partial status", async () => {
     const adapter = new FakeVaultAdapter();
     const bob = { ...validProfile, id: "vault-speaker-bob", displayName: "Bob" };
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify([validProfile, { ...validProfile }, bob]));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify([validProfile, { ...validProfile }, bob]));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadEditable()).rejects.toThrow(
@@ -355,7 +355,7 @@ describe("SpeakerStore", () => {
 
   it("loadEditable throws for invalid storage so write flows cannot replace unreadable data", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", "{broken");
+    adapter.files.set(".local-transcription/speakers.json", "{broken");
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadEditable()).rejects.toThrow(
@@ -366,7 +366,7 @@ describe("SpeakerStore", () => {
   it("reports partial status while preserving valid profiles when stored profiles include invalid entries", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([
         validProfile,
         { ...validProfile, id: " " },
@@ -391,7 +391,7 @@ describe("SpeakerStore", () => {
   it("rejects parseable timestamps that do not round-trip to ISO strings", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([
         validProfile,
         { ...validProfile, id: "vault-speaker-non-iso-created", createdAt: "2026-06-02T00:00:00" },
@@ -411,7 +411,7 @@ describe("SpeakerStore", () => {
   it("reports reason-specific warning categories for skipped stored profiles", async () => {
     const adapter = new FakeVaultAdapter();
     adapter.files.set(
-      ".local-asr/speakers.json",
+      ".local-transcription/speakers.json",
       JSON.stringify([
         validProfile,
         { ...validProfile, id: " " },
@@ -461,7 +461,7 @@ describe("SpeakerStore", () => {
 
   it("rejects malformed profile JSON by returning an empty list", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", "{broken");
+    adapter.files.set(".local-transcription/speakers.json", "{broken");
     const store = new SpeakerStore(adapter);
 
     await expect(store.load()).resolves.toEqual([]);
@@ -469,7 +469,7 @@ describe("SpeakerStore", () => {
 
   it("reports invalid status for malformed JSON while load still returns an empty list", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", "{broken");
+    adapter.files.set(".local-transcription/speakers.json", "{broken");
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toMatchObject({ status: "invalid", profiles: [] });
@@ -478,7 +478,7 @@ describe("SpeakerStore", () => {
 
   it("reports invalid status for non-array JSON while load still returns an empty list", async () => {
     const adapter = new FakeVaultAdapter();
-    adapter.files.set(".local-asr/speakers.json", JSON.stringify({ profiles: [validProfile] }));
+    adapter.files.set(".local-transcription/speakers.json", JSON.stringify({ profiles: [validProfile] }));
     const store = new SpeakerStore(adapter);
 
     await expect(store.loadWithStatus()).resolves.toEqual({
@@ -510,7 +510,7 @@ describe("SpeakerStore", () => {
 
     await store.save([caro, bob, alice]);
 
-    expect(adapter.files.get(".local-asr/speakers.json")).toBe(
+    expect(adapter.files.get(".local-transcription/speakers.json")).toBe(
       `${JSON.stringify([{ ...alice, displayName: "Alice" }, bob, caro], null, 2)}\n`
     );
   });
@@ -524,7 +524,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("rejects duplicate runtime profile ids before writing", async () => {
@@ -536,7 +536,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("rejects duplicate runtime gateway speaker IDs before writing", async () => {
@@ -554,7 +554,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("rejects runtime display name and alias identity collisions before writing", async () => {
@@ -573,7 +573,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("rejects duplicate aliases within one runtime profile before writing", async () => {
@@ -585,7 +585,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("rejects runtime profiles whose alias equals their display name before writing", async () => {
@@ -597,7 +597,7 @@ describe("SpeakerStore", () => {
     );
 
     expect(adapter.ensuredFolders).toEqual([]);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 
   it("strips extra runtime fields from serialized profile JSON", async () => {
@@ -611,7 +611,7 @@ describe("SpeakerStore", () => {
 
     await store.save([profileWithRuntimeFields]);
 
-    expect(adapter.files.get(".local-asr/speakers.json")).toBe(`${JSON.stringify([validProfile], null, 2)}\n`);
+    expect(adapter.files.get(".local-transcription/speakers.json")).toBe(`${JSON.stringify([validProfile], null, 2)}\n`);
   });
 
   it("trims persisted speaker identity fields when saving serialized JSON", async () => {
@@ -628,7 +628,7 @@ describe("SpeakerStore", () => {
       }
     ]);
 
-    expect(adapter.files.get(".local-asr/speakers.json")).toBe(
+    expect(adapter.files.get(".local-transcription/speakers.json")).toBe(
       `${JSON.stringify([{ ...validProfile, aliases: ["PM", "Facilitator"] }], null, 2)}\n`
     );
   });
@@ -653,6 +653,6 @@ describe("SpeakerStore", () => {
     const updated = { ...validProfile, displayName: "Alice Updated" };
     await store.save([updated]);
     expect(adapter.files.get("custom/speakers.json")).toBe(`${JSON.stringify([updated], null, 2)}\n`);
-    expect(adapter.files.has(".local-asr/speakers.json")).toBe(false);
+    expect(adapter.files.has(".local-transcription/speakers.json")).toBe(false);
   });
 });
