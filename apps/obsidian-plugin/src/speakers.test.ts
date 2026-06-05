@@ -44,6 +44,12 @@ describe("speaker confidence policy", () => {
     expect(confidenceAction(87)).toBe("ignore");
     expect(confidenceAction(-0.1)).toBe("ignore");
   });
+
+  it("classifies confidence bands with custom thresholds", () => {
+    expect(confidenceAction(0.8, { autoApplySpeakerConfidence: 0.75, suggestSpeakerConfidence: 0.5 })).toBe("auto");
+    expect(confidenceAction(0.6, { autoApplySpeakerConfidence: 0.75, suggestSpeakerConfidence: 0.5 })).toBe("suggest");
+    expect(confidenceAction(0.4, { autoApplySpeakerConfidence: 0.75, suggestSpeakerConfidence: 0.5 })).toBe("ignore");
+  });
 });
 
 describe("speaker map creation", () => {
@@ -458,6 +464,49 @@ describe("speaker map creation", () => {
 
     expect(map["说话人1"]).toBeUndefined();
     expect(map).not.toHaveProperty("说话人1");
+  });
+
+  it("uses custom confidence thresholds when building the initial map", () => {
+    const segments: NormalizedSegment[] = [
+      {
+        start: 0,
+        end: 1,
+        speaker: "说话人1",
+        text: "hello",
+        speakerMatch: {
+          speakerId: "vp_alice",
+          displayName: "Gateway Alice",
+          confidence: 0.8
+        }
+      },
+      {
+        start: 1,
+        end: 2,
+        speaker: "说话人2",
+        text: "later",
+        speakerMatch: {
+          speakerId: "vp_bob",
+          displayName: "Gateway Bob",
+          confidence: 0.6
+        }
+      }
+    ];
+
+    const map = buildInitialSpeakerMap(segments, profiles, {}, {
+      autoApplySpeakerConfidence: 0.75,
+      suggestSpeakerConfidence: 0.5
+    });
+
+    expect(map["说话人1"]).toMatchObject({
+      displayName: "Alice",
+      source: "auto_high_confidence",
+      confidence: 0.8
+    });
+    expect(map["说话人2"]).toMatchObject({
+      suggestedDisplayName: "Bob",
+      source: "suggested",
+      confidence: 0.6
+    });
   });
 });
 

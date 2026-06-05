@@ -4,6 +4,9 @@ export interface LocalAsrSettings {
   gatewayUrl: string;
   audioSavePath: string;
   transcriptSavePath: string;
+  speakerProfilesPath: string;
+  autoApplySpeakerConfidence: number;
+  suggestSpeakerConfidence: number;
   noteFilenameTemplate: string;
   noteTemplate: string;
   outputMode: OutputMode;
@@ -22,6 +25,9 @@ export const DEFAULT_SETTINGS: LocalAsrSettings = {
   gatewayUrl: "http://localhost:17002",
   audioSavePath: "Recordings/Audio",
   transcriptSavePath: "Recordings/Transcripts",
+  speakerProfilesPath: ".local-asr/speakers.json",
+  autoApplySpeakerConfidence: 0.85,
+  suggestSpeakerConfidence: 0.65,
   noteFilenameTemplate: "{{datetime}} - {{title}}",
   noteTemplate: "![[{{audioFile}}]]\n\n{{transcription}}",
   outputMode: "speaker_timestamp",

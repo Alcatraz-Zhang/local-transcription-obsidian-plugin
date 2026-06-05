@@ -28,6 +28,11 @@ export interface MappedSpeakerSegment extends NormalizedSegment {
   originalSpeaker?: string;
 }
 
+export interface SpeakerConfidenceOptions {
+  autoApplySpeakerConfidence?: number;
+  suggestSpeakerConfidence?: number;
+}
+
 export const HIGH_CONFIDENCE_THRESHOLD = 0.85;
 export const MEDIUM_CONFIDENCE_THRESHOLD = 0.65;
 
@@ -46,14 +51,41 @@ export function normalizeSpeakerIdentity(value: string | undefined): string {
   return value?.trim().toLowerCase() ?? "";
 }
 
-export function confidenceAction(confidence: number | undefined): ConfidenceAction {
+function validThreshold(value: number | undefined): value is number {
+  return value !== undefined && Number.isFinite(value) && value >= 0 && value <= 1;
+}
+
+function resolveConfidenceThresholds(options?: SpeakerConfidenceOptions): {
+  autoApplySpeakerConfidence: number;
+  suggestSpeakerConfidence: number;
+} {
+  const autoApplySpeakerConfidence =
+    options?.autoApplySpeakerConfidence === undefined || validThreshold(options.autoApplySpeakerConfidence)
+      ? options?.autoApplySpeakerConfidence ?? HIGH_CONFIDENCE_THRESHOLD
+      : HIGH_CONFIDENCE_THRESHOLD;
+  const suggestSpeakerConfidence =
+    options?.suggestSpeakerConfidence === undefined || validThreshold(options.suggestSpeakerConfidence)
+      ? options?.suggestSpeakerConfidence ?? MEDIUM_CONFIDENCE_THRESHOLD
+      : MEDIUM_CONFIDENCE_THRESHOLD;
+
+  if (autoApplySpeakerConfidence < suggestSpeakerConfidence) {
+    return {
+      autoApplySpeakerConfidence: HIGH_CONFIDENCE_THRESHOLD,
+      suggestSpeakerConfidence: MEDIUM_CONFIDENCE_THRESHOLD
+    };
+  }
+  return { autoApplySpeakerConfidence, suggestSpeakerConfidence };
+}
+
+export function confidenceAction(confidence: number | undefined, options?: SpeakerConfidenceOptions): ConfidenceAction {
   if (confidence === undefined || !Number.isFinite(confidence) || confidence < 0 || confidence > 1) {
     return "ignore";
   }
-  if (confidence >= HIGH_CONFIDENCE_THRESHOLD) {
+  const thresholds = resolveConfidenceThresholds(options);
+  if (confidence >= thresholds.autoApplySpeakerConfidence) {
     return "auto";
   }
-  if (confidence >= MEDIUM_CONFIDENCE_THRESHOLD) {
+  if (confidence >= thresholds.suggestSpeakerConfidence) {
     return "suggest";
   }
   return "ignore";
@@ -129,7 +161,8 @@ function shouldReplaceSpeakerMapEntry(
 export function buildInitialSpeakerMap(
   segments: NormalizedSegment[],
   profiles: SpeakerProfile[],
-  existing: MeetingSpeakerMap = {}
+  existing: MeetingSpeakerMap = {},
+  options?: SpeakerConfidenceOptions
 ): MeetingSpeakerMap {
   const next: MeetingSpeakerMap = { ...existing };
   for (const segment of segments) {
@@ -143,7 +176,7 @@ export function buildInitialSpeakerMap(
     }
     const confidence = segment.speakerMatch?.confidence;
     const gatewaySpeakerId = segment.speakerMatch?.speakerId;
-    const action = confidenceAction(confidence);
+    const action = confidenceAction(confidence, options);
     let candidate: MeetingSpeakerMapEntry | undefined;
     if (action === "auto") {
       candidate = {

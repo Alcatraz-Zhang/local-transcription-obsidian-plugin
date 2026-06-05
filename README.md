@@ -108,6 +108,16 @@ Default transcript format:
 
 The gateway does not inject this formatted transcript into `text`. It returns structured segment data, and the plugin renders the final note according to the selected output mode.
 
+## Speaker Workflow
+
+Human-readable speaker profiles are stored in the vault at `.local-asr/speakers.json`.
+Gateway voiceprint embeddings are stored separately in the Docker `/data` volume.
+
+Confidence handling is intentionally simple: matches at `>=0.85` are auto-applied,
+matches from `0.65` to below `0.85` are kept as suggestions, and matches below
+`0.65` keep the temporary ASR speaker label. The plugin also preserves the raw ASR
+JSON beside each transcript note as `*.raw-asr.json`.
+
 ## API
 
 - `GET /health`

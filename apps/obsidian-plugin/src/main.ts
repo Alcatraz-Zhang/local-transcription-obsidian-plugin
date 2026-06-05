@@ -5,6 +5,8 @@ import {
   Plugin,
   PluginSettingTab,
   Setting,
+  TFile,
+  TFolder,
   normalizePath
 } from "obsidian";
 
@@ -15,8 +17,79 @@ import {
   type LocalAsrSettings
 } from "./settings";
 import { expandTemplate, defaultTitleFromFile, safeNoteFileName } from "./template";
-import { transcriptText } from "./transcript";
+import { normalizeSegments, transcriptText } from "./transcript";
 import { mergeProcessedTranscript, postProcessTranscript } from "./postProcessing";
+import { SpeakerStore, type VaultAdapter } from "./speakerStore";
+import { buildInitialSpeakerMap } from "./speakers";
+import {
+  buildSpeakerFrontmatter,
+  prependSpeakerFrontmatter,
+  shouldUseSpeakerSidecar,
+  speakerSidecarPath
+} from "./noteArtifacts";
+
+function parentFolder(path: string): string | undefined {
+  const normalized = normalizePath(path);
+  const separator = normalized.lastIndexOf("/");
+  if (separator <= 0) {
+    return undefined;
+  }
+  return normalized.slice(0, separator);
+}
+
+export class ObsidianVaultAdapter implements VaultAdapter {
+  constructor(private readonly app: App) {}
+
+  async read(path: string): Promise<string | null> {
+    const file = this.app.vault.getAbstractFileByPath(normalizePath(path));
+    if (!(file instanceof TFile)) {
+      return null;
+    }
+    return this.app.vault.read(file);
+  }
+
+  async ensureFolder(path: string): Promise<void> {
+    if (!path) {
+      return;
+    }
+    const normalized = normalizePath(path);
+    const parts = normalized.split("/").filter(Boolean);
+    let current = "";
+    for (const part of parts) {
+      current = current ? `${current}/${part}` : part;
+      const existing = this.app.vault.getAbstractFileByPath(current);
+      if (existing === null) {
+        await this.app.vault.createFolder(current);
+        continue;
+      }
+      if (existing instanceof TFolder) {
+        continue;
+      }
+      throw new Error(`Cannot create folder because a file exists at ${current}`);
+    }
+  }
+
+  async write(path: string, content: string): Promise<void> {
+    const normalized = normalizePath(path);
+    const folder = parentFolder(normalized);
+    if (folder) {
+      await this.ensureFolder(folder);
+    }
+    const file = this.app.vault.getAbstractFileByPath(normalized);
+    if (file instanceof TFile) {
+      await this.app.vault.modify(file, content);
+      return;
+    }
+    if (file instanceof TFolder) {
+      throw new Error(`Cannot write file because a folder exists at ${normalized}`);
+    }
+    await this.app.vault.create(normalized, content);
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 class StatusModal extends Modal {
   private statusEl: HTMLElement;
@@ -72,6 +145,16 @@ export default class LocalAsrGatewayPlugin extends Plugin {
       name: "Test gateway health",
       callback: () => this.testGatewayHealth()
     });
+    this.addCommand({
+      id: "local-asr-list-speakers",
+      name: "Local ASR: List Speakers",
+      callback: () => this.listSpeakers()
+    });
+    this.addCommand({
+      id: "local-asr-refresh-voiceprint-speakers",
+      name: "Local ASR: Check Voiceprint Speakers",
+      callback: () => this.checkVoiceprintSpeakers()
+    });
     this.addRibbonIcon("mic", "Local ASR Gateway", () => this.pickAndTranscribeFile());
   }
 
@@ -91,6 +174,10 @@ export default class LocalAsrGatewayPlugin extends Plugin {
     return new GatewayClient(this.pluginSettings.gatewayUrl);
   }
 
+  private speakerStore(): SpeakerStore {
+    return new SpeakerStore(new ObsidianVaultAdapter(this.app), this.pluginSettings.speakerProfilesPath);
+  }
+
   private async testGatewayHealth(): Promise<void> {
     const modal = this.openStatus("Checking gateway health...");
     try {
@@ -98,6 +185,28 @@ export default class LocalAsrGatewayPlugin extends Plugin {
       modal.setStatus(JSON.stringify(health, null, 2));
     } catch (error) {
       modal.setStatus(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  private async listSpeakers(): Promise<void> {
+    try {
+      const profiles = await this.speakerStore().load();
+      new Notice(
+        profiles.length
+          ? profiles.map((profile) => profile.displayName).join(", ")
+          : "No Local ASR speaker profiles yet."
+      );
+    } catch (error) {
+      new Notice(`Could not load Local ASR speakers: ${errorMessage(error)}`);
+    }
+  }
+
+  private async checkVoiceprintSpeakers(): Promise<void> {
+    try {
+      const speakers = await this.client().listVoiceprintSpeakers();
+      new Notice(`Gateway voiceprint speakers: ${speakers.speakers.length}`);
+    } catch (error) {
+      new Notice(`Could not check gateway voiceprint speakers: ${errorMessage(error)}`);
     }
   }
 
@@ -197,7 +306,14 @@ export default class LocalAsrGatewayPlugin extends Plugin {
 
   private async createTranscriptNote(job: GatewayJob, audioPath: string, title: string): Promise<void> {
     await this.ensureFolder(this.pluginSettings.transcriptSavePath);
-    const rawText = transcriptText(job.result ?? {}, this.pluginSettings.outputMode);
+    const result = job.result ?? {};
+    const normalizedSegments = normalizeSegments(result);
+    const speakerProfiles = await this.speakerStore().load();
+    const speakerMap = buildInitialSpeakerMap(normalizedSegments, speakerProfiles, {}, {
+      autoApplySpeakerConfidence: this.pluginSettings.autoApplySpeakerConfidence,
+      suggestSpeakerConfidence: this.pluginSettings.suggestSpeakerConfidence
+    });
+    const rawText = transcriptText(result, this.pluginSettings.outputMode, speakerMap);
     let finalText = rawText;
     if (this.pluginSettings.postProcessingEnabled) {
       const apiKey = await this.getPostProcessingApiKey();
@@ -221,23 +337,29 @@ export default class LocalAsrGatewayPlugin extends Plugin {
     const variables = { audioFile: audioPath, transcription: finalText, title, date, datetime };
     const filename = safeNoteFileName(expandTemplate(this.pluginSettings.noteFilenameTemplate, variables));
     const notePath = await this.availablePath(normalizePath(`${this.pluginSettings.transcriptSavePath}/${filename}.md`));
-    const content = expandTemplate(this.pluginSettings.noteTemplate, variables).trim() + "\n";
+    const rawAsrPath = await this.availablePath(notePath.replace(/\.md$/i, ".raw-asr.json"));
+    const rawAsrContent = `${JSON.stringify(result, null, 2)}\n`;
+    const speakerMapContent = `${JSON.stringify(speakerMap, null, 2)}\n`;
+    const speakerMapSidecarPath = shouldUseSpeakerSidecar(speakerMap)
+      ? await this.availablePath(speakerSidecarPath(notePath))
+      : undefined;
+    const frontmatter = speakerMapSidecarPath
+      ? { local_asr_speaker_map: speakerMapSidecarPath }
+      : buildSpeakerFrontmatter(speakerMap);
+    const content = prependSpeakerFrontmatter(
+      expandTemplate(this.pluginSettings.noteTemplate, variables).trim() + "\n",
+      frontmatter
+    );
+    const vaultAdapter = new ObsidianVaultAdapter(this.app);
+    await vaultAdapter.write(rawAsrPath, rawAsrContent);
+    if (speakerMapSidecarPath) {
+      await vaultAdapter.write(speakerMapSidecarPath, speakerMapContent);
+    }
     await this.app.vault.create(notePath, content);
   }
 
   private async ensureFolder(path: string): Promise<void> {
-    if (!path) {
-      return;
-    }
-    const normalized = normalizePath(path);
-    const parts = normalized.split("/").filter(Boolean);
-    let current = "";
-    for (const part of parts) {
-      current = current ? `${current}/${part}` : part;
-      if (!(await this.app.vault.adapter.exists(current))) {
-        await this.app.vault.createFolder(current);
-      }
-    }
+    await new ObsidianVaultAdapter(this.app).ensureFolder(path);
   }
 
   private async availablePath(path: string): Promise<string> {
