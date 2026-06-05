@@ -1,0 +1,32 @@
+{
+  "job_id": "64d7fcaf9e19",
+  "status": "completed",
+  "duration_seconds": 600.0,
+  "segment_count": 40,
+  "sentence_info_count": 40,
+  "reference_word_count": 1233,
+  "asr_word_count": 1129,
+  "simple_wer": 0.2433,
+  "reference_speakers": [
+    "A/ID",
+    "B/PM",
+    "C/UI",
+    "D/ME"
+  ],
+  "asr_speakers": [
+    "说话人1",
+    "说话人2",
+    "说话人3"
+  ],
+  "keyword_hits": {
+    "kickoff": true,
+    "project manager": true,
+    "industrial designer": true,
+    "marketing expert": true,
+    "user interface": true,
+    "remote control": true,
+    "twenty five": true,
+    "twelve fifty": true,
+    "international": true
+  }
+}

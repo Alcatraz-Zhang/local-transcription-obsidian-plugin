@@ -16,3 +16,13 @@
 - Audio source: https://archive.org/details/war_peace_2_maude_translation_2302_librivox
 - Text source: https://www.gutenberg.org/ebooks/2600
 - Note: LibriVox recordings may include spoken intro/outro text that is not part of the Project Gutenberg chapter body.
+## AMI multi-speaker meeting
+- Directory: ami_es2002a/
+- Full audio: ES2002a.Mix-Headset.wav
+- Test clip: ES2002a.Mix-Headset.first10min.wav
+- Manual reference: ES2002a.Mix-Headset.first10min.manual.txt
+- Full manual reference: ES2002a.Mix-Headset.manual.txt
+- Source: https://groups.inf.ed.ac.uk/ami/download/
+- Audio URL: https://groups.inf.ed.ac.uk/ami/AMICorpusMirror/amicorpus/ES2002a/audio/ES2002a.Mix-Headset.wav
+- Annotation URL: https://groups.inf.ed.ac.uk/ami/AMICorpusAnnotations/ami_public_manual_1.6.2.zip
+- Note: The first 10 minute clip contains all four AMI ES2002a participants.

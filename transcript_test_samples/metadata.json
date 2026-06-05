@@ -33,6 +33,24 @@
       "duration_seconds": 1291.437982,
       "source": "https://archive.org/details/war_peace_2_maude_translation_2302_librivox",
       "text_source": "https://www.gutenberg.org/ebooks/2600"
+    },
+    {
+      "language": "en",
+      "dataset": "AMI Meeting Corpus",
+      "split": "scenario",
+      "id": "ES2002a",
+      "directory": "ami_es2002a",
+      "audio": "ami_es2002a/ES2002a.Mix-Headset.wav",
+      "test_clip": "ami_es2002a/ES2002a.Mix-Headset.first10min.wav",
+      "transcript": "ami_es2002a/ES2002a.Mix-Headset.first10min.manual.txt",
+      "full_transcript": "ami_es2002a/ES2002a.Mix-Headset.manual.txt",
+      "duration_seconds": 1272.64,
+      "test_clip_duration_seconds": 600,
+      "speakers": ["A/ID", "B/PM", "C/UI", "D/ME"],
+      "source": "https://groups.inf.ed.ac.uk/ami/download/",
+      "audio_source": "https://groups.inf.ed.ac.uk/ami/AMICorpusMirror/amicorpus/ES2002a/audio/ES2002a.Mix-Headset.wav",
+      "annotation_source": "https://groups.inf.ed.ac.uk/ami/AMICorpusAnnotations/ami_public_manual_1.6.2.zip",
+      "license_note": "AMI download page states released under Creative Commons Attribution 4.0 International Licence for the downloadable signals and transcription."
     }
   ]
 }

@@ -1,0 +1,491 @@
+{
+  "task": "transcribe",
+  "language": "en",
+  "duration": 600.0,
+  "text": "Um. My gosh, you've already produced a PowerPoint.\nUh, I think it's already on actually. Uh, God, how do make this thing work. Uh.\nYou have to.\nHello. I've plugged it in the back, but. Okay, right, and it all. Okay. Right. Um. Well, this is the kickoff meeting for our our project. And um, this is just what we're going to be doing over the next twenty five minutes. Um. So first of all, just to kind of, make sure that we all know each other. I'm Laura and I'm the project manager. Great. Do you want to introduce yourself again?\nHi, I'm David and I'm supposed to be an industrial designer. Okay.\nAnd I'm Andrew and I'm our marketing expert. I'm Greg and I'm user interface.\nGreat, okay. Um, so we're designing a new remote control, and um, oh, I have to record who's here actually, so it's David, Andrew, and Craig, isn't it? And you all arrived on time. Um, yes, we did a design a new remote control. Um, as you can see, it's supposed to be original, trendy, and user friendly. Um, so that's kind of our our brief, that we are, um, and so there are three different stages to the design, and I'm not really sure what what you guys have already received. Um, in your emails, what did you get?\nUm, I just got the project announcement. About the project is that designing a remote control.\nYeah, that's.\nWe got okay, um, so we're going to have like individual work and then a meeting about it, and repeat that process three times, um, and at this point we get try out the whiteboard over there, um, so uh, you get to draw your favorite animal and sum up your favorite characteristics of it. So who would like to go first? Very good.\nAll right. So. This one here, right. Okay. Very nice. All right, my favorite animal. Is like. A beagle. And, character's favorite characteristics of it is that right. Yeah. Uh, right. Well, basically, um, high priority for any animal for me is that they, be willing to take a lot of, physical affection, from, their family, and. Yeah, they have lots of personality and.\nBe fit and in robust good health, so this is blue, blue beagle. My family's beagle. Right. Lovely. Oh, my favorite animal would be a monkey. Then the small cute and furry, and when plant it becomes real, I'm going to be up there with them. Right.\nGear. You can take us long over this as you like because we haven't got an awful lot to discuss. Okay, we do, we do. Don't feel like you're in a rush anyway.\nI actually told you a whole lot more about beagles.\nWell, I'd have to get you up again. Then I don't know what mine is. I'm gonna have to think in the spot.\nImpressionist. Padre.\nIs that a whale? Yeah.\nUm. Well, my, I don't know. It's just the first animal I can think off the top of my head. Yes, big reason is because I'm allergic to most animals, allergic to animal first. So, um, fish was a natural choice. Um, yeah, and I kind of like whales. They come in and go, eat everything inside. They're quite harmless and mild and.\nInteresting. Okay.\nI still didn't know what I'm gonna write about.\nSuperb sketch. By the way.\nTails, but bigger I think. I was going to choose a dog as well, but I'll just draw a different kind of dog. My favorite animal is my own dog at home. That doesn't really look like him actually. He looks more like a pig actually. Oh well.\nI see a dog in there. Yeah, oh that's very good of you. Now I see a rooster.\nWhat kind is it? Um, he's a mixture of the various things, and what do I like about him? Um, that's just a death that his tail wags. Um, he's very friendly and cheery and always pleased to see you and very kind of affectionate and, um. And he's quite quite wee as well, so you know he can, doesn't take up too much space, um. And, and he does a funny thing where he chases his tail.\nWell, this is quite amusing. Is he aware that this is his own tail that he's chasing?\nIt is, I think it is. He only does it after he's had his dinner, and um, he just all of a sudden just get up and start chasing his tail, and, surround the living room.\nAnd after dinner, dog then.\nYeah. Probably when he was little, he got lots of attention for doing it, and has never been conditioned.\nMaybe. Um, where did you find this just down here? Okay. Um, what are we doing next? Um. Okay, uh, we now need to discuss the project finance. Um. So according to the brief, um, we're going to be selling this remote control for twenty five euro, um, and we're, aiming to make, fifty million euro. Um, so we're going to be selling this one on international scale, and we don't want it to cost any more than twelve fifty euros. So, fifty percent of the selling price.\nUm, can we just go over that again? Sure. Uh, so basically. Alright. Yeah. Okay. So cost like, production cost is. All together. Twelve fifty. But selling price is is that wholesale or retail? Like on the shelf. Um.\nI don't know. I imagine.\nThat's a good. Our sale. Our sale.\nI imagine it probably is our sale actually because it's probably up to the. The um, the retailer to sell it for whatever price they want. Um. But I I don't know. I mean, do you think the fact that it's going to be sold internationally will have a bearing on, how we design it at all.\nYes, I think it will.\nUm.\nOh right away I'm wondering if there's like with DVD players if there are zones. Oh yeah, regions and stuff. Frequencies or something. Yeah. As well as characters, different keypad styles and symbols.\nYeah, well for a remote control, do you think that will be, I suppose it depends on how complicated our remote control is.\nIt does make sense from maybe the design point of view because if you have more complicated characters like European languages then you need more buttons.\nYeah, yeah.\nYeah. Okay. And then, and then the other thing international is on the topic of price, I'm thinking. The price might, might appeal to a certain market in one region, whereas in another it'll be different. So. What just like in terms of like the wealth of the country.",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 7.4,
+      "text": "Um. My gosh, you've already produced a PowerPoint.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 7.4,
+      "end": 21.62,
+      "text": "Uh, I think it's already on actually. Uh, God, how do make this thing work. Uh.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 25.68,
+      "end": 27.15,
+      "text": "You have to.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 30.3,
+      "end": 77.34,
+      "text": "Hello. I've plugged it in the back, but. Okay, right, and it all. Okay. Right. Um. Well, this is the kickoff meeting for our our project. And um, this is just what we're going to be doing over the next twenty five minutes. Um. So first of all, just to kind of, make sure that we all know each other. I'm Laura and I'm the project manager. Great. Do you want to introduce yourself again?",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 77.34,
+      "end": 81.51,
+      "text": "Hi, I'm David and I'm supposed to be an industrial designer. Okay.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 81.82,
+      "end": 88.86,
+      "text": "And I'm Andrew and I'm our marketing expert. I'm Greg and I'm user interface.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 89.14,
+      "end": 132.0,
+      "text": "Great, okay. Um, so we're designing a new remote control, and um, oh, I have to record who's here actually, so it's David, Andrew, and Craig, isn't it? And you all arrived on time. Um, yes, we did a design a new remote control. Um, as you can see, it's supposed to be original, trendy, and user friendly. Um, so that's kind of our our brief, that we are, um, and so there are three different stages to the design, and I'm not really sure what what you guys have already received. Um, in your emails, what did you get?",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 132.0,
+      "end": 138.42,
+      "text": "Um, I just got the project announcement. About the project is that designing a remote control.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 139.23,
+      "end": 140.76,
+      "text": "Yeah, that's.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 140.76,
+      "end": 169.12,
+      "text": "We got okay, um, so we're going to have like individual work and then a meeting about it, and repeat that process three times, um, and at this point we get try out the whiteboard over there, um, so uh, you get to draw your favorite animal and sum up your favorite characteristics of it. So who would like to go first? Very good.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 173.96,
+      "end": 233.84,
+      "text": "All right. So. This one here, right. Okay. Very nice. All right, my favorite animal. Is like. A beagle. And, character's favorite characteristics of it is that right. Yeah. Uh, right. Well, basically, um, high priority for any animal for me is that they, be willing to take a lot of, physical affection, from, their family, and. Yeah, they have lots of personality and.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 235.4,
+      "end": 276.31,
+      "text": "Be fit and in robust good health, so this is blue, blue beagle. My family's beagle. Right. Lovely. Oh, my favorite animal would be a monkey. Then the small cute and furry, and when plant it becomes real, I'm going to be up there with them. Right.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 281.07,
+      "end": 293.8,
+      "text": "Gear. You can take us long over this as you like because we haven't got an awful lot to discuss. Okay, we do, we do. Don't feel like you're in a rush anyway.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 295.74,
+      "end": 298.2,
+      "text": "I actually told you a whole lot more about beagles.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 298.2,
+      "end": 303.64,
+      "text": "Well, I'd have to get you up again. Then I don't know what mine is. I'm gonna have to think in the spot.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 306.82,
+      "end": 310.13,
+      "text": "Impressionist. Padre.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 311.77,
+      "end": 314.02,
+      "text": "Is that a whale? Yeah.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 318.33,
+      "end": 340.21,
+      "text": "Um. Well, my, I don't know. It's just the first animal I can think off the top of my head. Yes, big reason is because I'm allergic to most animals, allergic to animal first. So, um, fish was a natural choice. Um, yeah, and I kind of like whales. They come in and go, eat everything inside. They're quite harmless and mild and.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 340.79,
+      "end": 342.93,
+      "text": "Interesting. Okay.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 343.41,
+      "end": 346.84,
+      "text": "I still didn't know what I'm gonna write about.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 349.45,
+      "end": 351.16,
+      "text": "Superb sketch. By the way.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 353.83,
+      "end": 376.46,
+      "text": "Tails, but bigger I think. I was going to choose a dog as well, but I'll just draw a different kind of dog. My favorite animal is my own dog at home. That doesn't really look like him actually. He looks more like a pig actually. Oh well.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 378.2,
+      "end": 383.86,
+      "text": "I see a dog in there. Yeah, oh that's very good of you. Now I see a rooster.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 387.99,
+      "end": 429.55,
+      "text": "What kind is it? Um, he's a mixture of the various things, and what do I like about him? Um, that's just a death that his tail wags. Um, he's very friendly and cheery and always pleased to see you and very kind of affectionate and, um. And he's quite quite wee as well, so you know he can, doesn't take up too much space, um. And, and he does a funny thing where he chases his tail.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 429.83,
+      "end": 433.52,
+      "text": "Well, this is quite amusing. Is he aware that this is his own tail that he's chasing?",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 433.52,
+      "end": 442.08,
+      "text": "It is, I think it is. He only does it after he's had his dinner, and um, he just all of a sudden just get up and start chasing his tail, and, surround the living room.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 442.08,
+      "end": 443.53,
+      "text": "And after dinner, dog then.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 443.53,
+      "end": 449.07,
+      "text": "Yeah. Probably when he was little, he got lots of attention for doing it, and has never been conditioned.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 449.07,
+      "end": 495.1,
+      "text": "Maybe. Um, where did you find this just down here? Okay. Um, what are we doing next? Um. Okay, uh, we now need to discuss the project finance. Um. So according to the brief, um, we're going to be selling this remote control for twenty five euro, um, and we're, aiming to make, fifty million euro. Um, so we're going to be selling this one on international scale, and we don't want it to cost any more than twelve fifty euros. So, fifty percent of the selling price.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 495.77,
+      "end": 515.24,
+      "text": "Um, can we just go over that again? Sure. Uh, so basically. Alright. Yeah. Okay. So cost like, production cost is. All together. Twelve fifty. But selling price is is that wholesale or retail? Like on the shelf. Um.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 516.059,
+      "end": 517.76,
+      "text": "I don't know. I imagine.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 517.76,
+      "end": 519.64,
+      "text": "That's a good. Our sale. Our sale.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 519.64,
+      "end": 538.2,
+      "text": "I imagine it probably is our sale actually because it's probably up to the. The um, the retailer to sell it for whatever price they want. Um. But I I don't know. I mean, do you think the fact that it's going to be sold internationally will have a bearing on, how we design it at all.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 538.2,
+      "end": 540.1,
+      "text": "Yes, I think it will.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 540.42,
+      "end": 541.8,
+      "text": "Um.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 545.17,
+      "end": 565.16,
+      "text": "Oh right away I'm wondering if there's like with DVD players if there are zones. Oh yeah, regions and stuff. Frequencies or something. Yeah. As well as characters, different keypad styles and symbols.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 565.16,
+      "end": 571.15,
+      "text": "Yeah, well for a remote control, do you think that will be, I suppose it depends on how complicated our remote control is.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 571.56,
+      "end": 580.34,
+      "text": "It does make sense from maybe the design point of view because if you have more complicated characters like European languages then you need more buttons.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 580.34,
+      "end": 582.06,
+      "text": "Yeah, yeah.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 582.06,
+      "end": 599.98,
+      "text": "Yeah. Okay. And then, and then the other thing international is on the topic of price, I'm thinking. The price might, might appeal to a certain market in one region, whereas in another it'll be different. So. What just like in terms of like the wealth of the country.",
+      "speaker": "说话人2"
+    }
+  ],
+  "words": null,
+  "sentence_info": [
+    {
+      "start": 0.0,
+      "end": 7.4,
+      "text": "Um. My gosh, you've already produced a PowerPoint.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 7.4,
+      "end": 21.62,
+      "text": "Uh, I think it's already on actually. Uh, God, how do make this thing work. Uh.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 25.68,
+      "end": 27.15,
+      "text": "You have to.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 30.3,
+      "end": 77.34,
+      "text": "Hello. I've plugged it in the back, but. Okay, right, and it all. Okay. Right. Um. Well, this is the kickoff meeting for our our project. And um, this is just what we're going to be doing over the next twenty five minutes. Um. So first of all, just to kind of, make sure that we all know each other. I'm Laura and I'm the project manager. Great. Do you want to introduce yourself again?",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 77.34,
+      "end": 81.51,
+      "text": "Hi, I'm David and I'm supposed to be an industrial designer. Okay.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 81.82,
+      "end": 88.86,
+      "text": "And I'm Andrew and I'm our marketing expert. I'm Greg and I'm user interface.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 89.14,
+      "end": 132.0,
+      "text": "Great, okay. Um, so we're designing a new remote control, and um, oh, I have to record who's here actually, so it's David, Andrew, and Craig, isn't it? And you all arrived on time. Um, yes, we did a design a new remote control. Um, as you can see, it's supposed to be original, trendy, and user friendly. Um, so that's kind of our our brief, that we are, um, and so there are three different stages to the design, and I'm not really sure what what you guys have already received. Um, in your emails, what did you get?",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 132.0,
+      "end": 138.42,
+      "text": "Um, I just got the project announcement. About the project is that designing a remote control.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 139.23,
+      "end": 140.76,
+      "text": "Yeah, that's.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 140.76,
+      "end": 169.12,
+      "text": "We got okay, um, so we're going to have like individual work and then a meeting about it, and repeat that process three times, um, and at this point we get try out the whiteboard over there, um, so uh, you get to draw your favorite animal and sum up your favorite characteristics of it. So who would like to go first? Very good.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 173.96,
+      "end": 233.84,
+      "text": "All right. So. This one here, right. Okay. Very nice. All right, my favorite animal. Is like. A beagle. And, character's favorite characteristics of it is that right. Yeah. Uh, right. Well, basically, um, high priority for any animal for me is that they, be willing to take a lot of, physical affection, from, their family, and. Yeah, they have lots of personality and.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 235.4,
+      "end": 276.31,
+      "text": "Be fit and in robust good health, so this is blue, blue beagle. My family's beagle. Right. Lovely. Oh, my favorite animal would be a monkey. Then the small cute and furry, and when plant it becomes real, I'm going to be up there with them. Right.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 281.07,
+      "end": 293.8,
+      "text": "Gear. You can take us long over this as you like because we haven't got an awful lot to discuss. Okay, we do, we do. Don't feel like you're in a rush anyway.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 295.74,
+      "end": 298.2,
+      "text": "I actually told you a whole lot more about beagles.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 298.2,
+      "end": 303.64,
+      "text": "Well, I'd have to get you up again. Then I don't know what mine is. I'm gonna have to think in the spot.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 306.82,
+      "end": 310.13,
+      "text": "Impressionist. Padre.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 311.77,
+      "end": 314.02,
+      "text": "Is that a whale? Yeah.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 318.33,
+      "end": 340.21,
+      "text": "Um. Well, my, I don't know. It's just the first animal I can think off the top of my head. Yes, big reason is because I'm allergic to most animals, allergic to animal first. So, um, fish was a natural choice. Um, yeah, and I kind of like whales. They come in and go, eat everything inside. They're quite harmless and mild and.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 340.79,
+      "end": 342.93,
+      "text": "Interesting. Okay.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 343.41,
+      "end": 346.84,
+      "text": "I still didn't know what I'm gonna write about.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 349.45,
+      "end": 351.16,
+      "text": "Superb sketch. By the way.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 353.83,
+      "end": 376.46,
+      "text": "Tails, but bigger I think. I was going to choose a dog as well, but I'll just draw a different kind of dog. My favorite animal is my own dog at home. That doesn't really look like him actually. He looks more like a pig actually. Oh well.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 378.2,
+      "end": 383.86,
+      "text": "I see a dog in there. Yeah, oh that's very good of you. Now I see a rooster.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 387.99,
+      "end": 429.55,
+      "text": "What kind is it? Um, he's a mixture of the various things, and what do I like about him? Um, that's just a death that his tail wags. Um, he's very friendly and cheery and always pleased to see you and very kind of affectionate and, um. And he's quite quite wee as well, so you know he can, doesn't take up too much space, um. And, and he does a funny thing where he chases his tail.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 429.83,
+      "end": 433.52,
+      "text": "Well, this is quite amusing. Is he aware that this is his own tail that he's chasing?",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 433.52,
+      "end": 442.08,
+      "text": "It is, I think it is. He only does it after he's had his dinner, and um, he just all of a sudden just get up and start chasing his tail, and, surround the living room.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 442.08,
+      "end": 443.53,
+      "text": "And after dinner, dog then.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 443.53,
+      "end": 449.07,
+      "text": "Yeah. Probably when he was little, he got lots of attention for doing it, and has never been conditioned.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 449.07,
+      "end": 495.1,
+      "text": "Maybe. Um, where did you find this just down here? Okay. Um, what are we doing next? Um. Okay, uh, we now need to discuss the project finance. Um. So according to the brief, um, we're going to be selling this remote control for twenty five euro, um, and we're, aiming to make, fifty million euro. Um, so we're going to be selling this one on international scale, and we don't want it to cost any more than twelve fifty euros. So, fifty percent of the selling price.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 495.77,
+      "end": 515.24,
+      "text": "Um, can we just go over that again? Sure. Uh, so basically. Alright. Yeah. Okay. So cost like, production cost is. All together. Twelve fifty. But selling price is is that wholesale or retail? Like on the shelf. Um.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 516.059,
+      "end": 517.76,
+      "text": "I don't know. I imagine.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 517.76,
+      "end": 519.64,
+      "text": "That's a good. Our sale. Our sale.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 519.64,
+      "end": 538.2,
+      "text": "I imagine it probably is our sale actually because it's probably up to the. The um, the retailer to sell it for whatever price they want. Um. But I I don't know. I mean, do you think the fact that it's going to be sold internationally will have a bearing on, how we design it at all.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 538.2,
+      "end": 540.1,
+      "text": "Yes, I think it will.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 540.42,
+      "end": 541.8,
+      "text": "Um.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 545.17,
+      "end": 565.16,
+      "text": "Oh right away I'm wondering if there's like with DVD players if there are zones. Oh yeah, regions and stuff. Frequencies or something. Yeah. As well as characters, different keypad styles and symbols.",
+      "speaker": "说话人2"
+    },
+    {
+      "start": 565.16,
+      "end": 571.15,
+      "text": "Yeah, well for a remote control, do you think that will be, I suppose it depends on how complicated our remote control is.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 571.56,
+      "end": 580.34,
+      "text": "It does make sense from maybe the design point of view because if you have more complicated characters like European languages then you need more buttons.",
+      "speaker": "说话人3"
+    },
+    {
+      "start": 580.34,
+      "end": 582.06,
+      "text": "Yeah, yeah.",
+      "speaker": "说话人1"
+    },
+    {
+      "start": 582.06,
+      "end": 599.98,
+      "text": "Yeah. Okay. And then, and then the other thing international is on the topic of price, I'm thinking. The price might, might appeal to a certain market in one region, whereas in another it'll be different. So. What just like in terms of like the wealth of the country.",
+      "speaker": "说话人2"
+    }
+  ]
+}

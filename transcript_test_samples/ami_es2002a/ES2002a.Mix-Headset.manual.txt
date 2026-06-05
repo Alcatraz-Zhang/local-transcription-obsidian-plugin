@@ -1,0 +1,243 @@
+# AMI ES2002a manual reference transcript
+
+Source audio: ES2002a.Mix-Headset.wav
+Speaker map: A=ID, B=PM, C=UI, D=ME
+
+Segments: 236
+
+[00:00:50 - 00:00:51] B/PM: Okay.
+[00:00:53 - 00:00:54] B/PM: Right.
+[00:00:55 - 00:01:17] B/PM: Um well this is the kick-off meeting for our our project. Um and um this is just what we're gonna be doing over the next twenty five minutes. Um so first of all, just to kind of make sure that we all know each other, I'm Laura and I'm the project manager. Do you want to introduce yourself again?
+[00:01:07 - 00:01:08] D/ME: Mm-hmm.
+[00:01:15 - 00:01:15] D/ME: Great.
+[00:01:17 - 00:01:21] A/ID: Hi, I'm David and I'm supposed to be an industrial designer.
+[00:01:21 - 00:01:21] B/PM: Okay.
+[00:01:22 - 00:01:25] D/ME: And I'm Andrew and I'm uh our marketing
+[00:01:26 - 00:01:29] C/UI: Um I'm Craig and I'm User Interface.
+[00:01:26 - 00:01:27] D/ME: expert.
+[00:01:29 - 00:01:42] B/PM: Great. Okay. Um so we're designing a new remote control and um Oh I have to record who's here actually. So that's David, Andrew and Craig, isn't it?
+[00:01:45 - 00:01:47] B/PM: And you all arrived on time.
+[00:01:49 - 00:02:13] B/PM: Um yeah so des uh design a new remote control. Um, as you can see it's supposed to be original, trendy and user friendly. Um so that's kind of our our brief, as it were. Um and so there are three different stages to the design. Um I'm not really sure what what you guys have already received um in your emails. What did you get?
+[00:02:12 - 00:02:22] A/ID: Um, I just got the project announcement about what the project is. Designing a remote control. That's about it, didn't get anything else. Did you get the same thing?
+[00:02:15 - 00:02:15] B/PM: Mm-hmm.
+[00:02:17 - 00:02:18] D/ME: Mm-hmm.
+[00:02:19 - 00:02:21] D/ME: Mm-hmm. Yeah, that's that's it.
+[00:02:20 - 00:02:47] B/PM: Is that what everybody got? Okay. Um. So we're gonna have like individual work and then a meeting about it. And repeat that process three times. Um and at this point we get try out the whiteboard over there. Um. So uh you get to draw your favourite animal and sum up your favourite characteristics of it. So who would like to go first?
+[00:02:20 - 00:02:21] C/UI: Yeah.
+[00:02:22 - 00:02:22] D/ME: Yeah.
+[00:02:46 - 00:02:48] D/ME: I will go. That's fine.
+[00:02:48 - 00:02:49] B/PM: Very good.
+[00:02:54 - 00:02:57] D/ME: Alright. So
+[00:03:01 - 00:03:03] D/ME: This one here, right?
+[00:03:03 - 00:03:05] B/PM: Mm-hmm.
+[00:03:04 - 00:03:08] D/ME: Okay. Very nice. Alright. My favourite animal
+[00:03:10 - 00:03:12] D/ME: is like
+[00:03:23 - 00:03:24] D/ME: A beagle.
+[00:03:32 - 00:04:02] D/ME: Um charac favourite characteristics of it? Is that right? Uh, right, well basically um high priority for any animal for me is that they be willing to take a lot of physical affection from their family. And, yeah that they have lots of personality and uh be fit and in robust good health. So this is blue. Blue beagle. My family's beagle.
+[00:03:36 - 00:03:37] B/PM: Yeah. Yeah.
+[00:04:03 - 00:04:06] B/PM: Right. Lovely.
+[00:04:15 - 00:04:18] C/UI: Well, my favourite animal would be a monkey.
+[00:04:28 - 00:04:34] C/UI: Then they're small cute and furry, and uh when planet of the apes becomes real, I'm gonna be up there with them.
+[00:04:36 - 00:04:36] B/PM: Right.
+[00:04:36 - 00:04:36] A/ID: Cool.
+[00:04:40 - 00:04:43] A/ID: There's too much gear.
+[00:04:46 - 00:04:53] B/PM: You can take as long over this as you like, because we haven't got an awful lot to discuss. Ok oh we do we do. Don't feel like you're in a rush, anyway.
+[00:04:53 - 00:04:55] A/ID: Okay.
+[00:04:56 - 00:05:01] D/ME: I coulda told you a whole lot more about beagles. Boy, let me tell you.
+[00:04:58 - 00:05:01] B/PM: Ach why not We might have to get you up again then.
+[00:05:01 - 00:05:04] B/PM: I don't know what mine is. I'm gonna have to think on the spot now.
+[00:05:07 - 00:05:08] D/ME: Impressionist.
+[00:05:09 - 00:05:11] A/ID: Can't draw.
+[00:05:12 - 00:05:16] B/PM: Is that a whale?
+[00:05:12 - 00:05:13] A/ID: Um.
+[00:05:13 - 00:05:14] A/ID: Yeah.
+[00:05:19 - 00:05:32] A/ID: Um, well anyway, I don't know, it's just the first animal I can think off the top of my head. Um. Yes. Big reason is 'cause I'm allergic to most animals. Allergic to animal fur, so um fish was a natural choice.
+[00:05:28 - 00:05:29] B/PM: Ah.
+[00:05:32 - 00:05:38] A/ID: Um, yeah, and I kind of like whales. They come in and go eat everything in sight.
+[00:05:38 - 00:05:39] D/ME: Alright.
+[00:05:38 - 00:05:42] A/ID: And they're quite harmless and mild and interesting.
+[00:05:42 - 00:05:42] D/ME: Mm.
+[00:05:42 - 00:05:47] B/PM: Okay. God, I still don't know what I'm gonna write about. Um.
+[00:05:50 - 00:05:51] D/ME: Superb sketch, by the way.
+[00:05:52 - 00:05:55] A/ID: Tail's a bit big, I think.
+[00:05:54 - 00:06:05] B/PM: I was gonna choose a dog as well. But I'll just draw a different kind of dog. M my favourite animal is my own dog at home. Um
+[00:06:00 - 00:06:00] D/ME: Yep.
+[00:06:07 - 00:06:09] B/PM: That doesn't really look like him, actually.
+[00:06:13 - 00:06:15] B/PM: He looks more like a pig, actually.
+[00:06:16 - 00:06:17] B/PM: Ah well.
+[00:06:18 - 00:06:20] D/ME: I see a dog in there. Yep.
+[00:06:20 - 00:06:21] B/PM: Do you? Oh that's very good of you.
+[00:06:23 - 00:06:24] D/ME: Now I see a rooster.
+[00:06:28 - 00:06:29] B/PM: Uh.
+[00:06:33 - 00:06:34] D/ME: What kind is it?
+[00:06:34 - 00:06:54] B/PM: Um he's a mixture of uh various things. Um and what do I like about him, um That's just to suggest that his tail wags. Um he's very friendly and cheery and always pleased to see you, and very kind of affectionate and um
+[00:06:54 - 00:07:02] B/PM: uh and he's quite quite wee as well so you know he can doesn't take up too much space. Um
+[00:07:05 - 00:07:12] B/PM: and uh And he does a funny thing where he chases his tail as well, which is quite amusing, so
+[00:07:11 - 00:07:13] D/ME: Is he aware that th it's his own cha tail he's chasing?
+[00:07:14 - 00:07:22] B/PM: It is. I think it is. He only does it after he's had his dinner and um he'll just all of a sudden just get up and start chasing his tail 'round the living room.
+[00:07:20 - 00:07:21] D/ME: Hmm.
+[00:07:20 - 00:07:23] A/ID: It's an after dinner dog then.
+[00:07:24 - 00:07:26] B/PM: Yeah, so uh
+[00:07:24 - 00:07:29] D/ME: Probably when he was little he got lots of attention for doing it and has forever been conditioned.
+[00:07:27 - 00:07:28] B/PM: Yeah, maybe.
+[00:07:29 - 00:07:34] B/PM: Maybe. Right, um where did you find this? Just down here? Yeah.
+[00:07:35 - 00:07:37] B/PM: Okay.
+[00:07:38 - 00:07:43] B/PM: Um what are we doing next? Uh um.
+[00:07:45 - 00:07:51] B/PM: Okay, uh we now need to discuss the project finance. Um
+[00:07:52 - 00:08:15] B/PM: so according to the brief um we're gonna be selling this remote control for twenty five Euro, um and we're aiming to make fifty million Euro. Um so we're gonna be selling this on an international scale. And uh we don't want it to cost any more than uh twelve fifty Euros, so fifty percent of the selling price.
+[00:08:08 - 00:08:09] D/ME: 'Kay.
+[00:08:16 - 00:08:18] D/ME: Um, can we just go over that again?
+[00:08:18 - 00:08:18] B/PM: Sure.
+[00:08:19 - 00:08:24] D/ME: Uh, so bas at twel Alright, yeah. Okay.
+[00:08:25 - 00:08:34] D/ME: So cost like production cost is twelve fifty, but selling price is is that wholesale or retail? Like on the shelf.
+[00:08:28 - 00:08:30] B/PM: All together.
+[00:08:34 - 00:08:39] B/PM: Um I dunno. I imagine That's a good question.
+[00:08:38 - 00:08:43] D/ME: Our sale our sale anyway. Yeah, okay okay.
+[00:08:40 - 00:08:43] B/PM: I imagine it probably is our sale actually because it's probably up to the
+[00:08:44 - 00:08:50] B/PM: the um the retailer to uh sell it for whatever price they want. Um.
+[00:08:47 - 00:08:47] D/ME: Okay.
+[00:08:49 - 00:08:49] D/ME: Mm-hmm.
+[00:08:51 - 00:08:52] D/ME: Alright.
+[00:08:52 - 00:08:58] B/PM: But I I don't know, I mean do you think the fact that it's going to be sold internationally will have a bearing on how we design it at all?
+[00:08:59 - 00:08:59] D/ME: Yes.
+[00:08:59 - 00:09:02] B/PM: Think it will? Um.
+[00:09:01 - 00:09:01] D/ME: Mm-hmm.
+[00:09:04 - 00:09:04] D/ME: Mm-hmm.
+[00:09:05 - 00:09:07] B/PM: Hmm.
+[00:09:08 - 00:09:26] D/ME: Well right away I'm wondering if there's um th th uh, like with D_V_D_ players, if there are zones. Um f frequencies or something um as well as uh characters, um different uh keypad styles and s symbols.
+[00:09:14 - 00:09:18] B/PM: Oh yeah, regions and stuff, yeah. Yeah. Okay.
+[00:09:25 - 00:09:31] B/PM: Yeah. Well for a remote control, do you think that will be I suppose it's depends on how complicated our remote control is.
+[00:09:25 - 00:09:26] A/ID: Hmm.
+[00:09:26 - 00:09:27] D/ME: Um.
+[00:09:28 - 00:09:29] D/ME: I don't know.
+[00:09:31 - 00:09:32] D/ME: Yeah.
+[00:09:32 - 00:09:40] A/ID: It does make sense from maybe the design point of view 'cause you have more complicated characters like European languages, then you need more buttons.
+[00:09:40 - 00:09:44] B/PM: Yeah, yeah. Okay.
+[00:09:41 - 00:09:41] D/ME: Yeah.
+[00:09:41 - 00:09:43] A/ID: So, possibly.
+[00:09:42 - 00:09:49] D/ME: Yeah. And then a and then al the other thing international is on top of the price. I'm thinking
+[00:09:51 - 00:09:57] D/ME: the price might might appeal to a certain market in one region, whereas in another it'll be different, so
+[00:09:57 - 00:10:04] B/PM: What, just like in terms of like the wealth of the country? Like how much money people have to spend on things like?
+[00:09:58 - 00:10:00] D/ME: Just a chara just a characteristic of the
+[00:10:01 - 00:10:02] D/ME: Just
+[00:10:03 - 00:10:17] D/ME: Or just like, basic product podi positioning, the twenty five Euro remote control might be a big hit in London, might not be such a big hit in Greece, who knows, something like that, yeah.
+[00:10:15 - 00:10:17] B/PM: Aye, I see what you mean, yeah.
+[00:10:18 - 00:10:25] B/PM: Marketing. Good marketing thoughts. Oh gosh, I should be writing all this down. Um.
+[00:10:20 - 00:10:21] D/ME: Yep.
+[00:10:55 - 00:11:09] D/ME: Right away I'm making some kind of assumptions about what what information we're given here, thinking, 'kay trendy probably means something other than just basic, something other than just standard. Um
+[00:11:01 - 00:11:01] B/PM: Mm.
+[00:11:05 - 00:11:06] B/PM: Yeah.
+[00:11:10 - 00:11:18] D/ME: so I'm wondering right away, is selling twenty five Euros, is that sort of the thi is this gonna to be like the premium product kinda thing or
+[00:11:17 - 00:11:21] B/PM: Yeah, yeah. Like how much does, you know, a remote control cost.
+[00:11:20 - 00:11:21] D/ME: Uh-huh.
+[00:11:21 - 00:11:24] B/PM: Well twenty five Euro, I mean that's um
+[00:11:25 - 00:11:32] B/PM: that's about like eighteen pounds or something, isn't it? Or no, is it as much as that? Sixteen seventeen eighteen pounds.
+[00:11:27 - 00:11:28] D/ME: Mm-hmm.
+[00:11:29 - 00:11:30] D/ME: Yep.
+[00:11:31 - 00:11:32] D/ME: Yeah, I'd say so, yeah.
+[00:11:32 - 00:11:40] B/PM: Um, I dunno, I've never bought a remote control, so I don't know how how good a remote control that would get you. Um.
+[00:11:36 - 00:11:37] D/ME: No.
+[00:11:38 - 00:11:42] D/ME: Yeah, yeah.
+[00:11:42 - 00:11:45] B/PM: But yeah, I suppose it has to look kind of cool and gimmicky.
+[00:11:44 - 00:11:44] D/ME: Mm-hmm.
+[00:11:46 - 00:11:50] B/PM: Um right, okay.
+[00:11:51 - 00:12:01] B/PM: Let me just scoot on ahead here. Okay. Um well d Does anybody have anything to add to uh to the finance issue at all?
+[00:12:02 - 00:12:07] D/ME: Do we have any other background information on like how that compares to other
+[00:12:03 - 00:12:03] B/PM: Thin
+[00:12:07 - 00:12:13] B/PM: No, actually. That would be useful, though, wouldn't it, if you knew like what your money would get you now.
+[00:12:08 - 00:12:09] D/ME: other
+[00:12:11 - 00:12:11] D/ME: Yeah.
+[00:12:12 - 00:12:13] A/ID: Hmm.
+[00:12:15 - 00:12:15] D/ME: Mm-hmm.
+[00:12:15 - 00:12:16] B/PM: Mm-hmm.
+[00:12:34 - 00:12:53] D/ME: Yeah, interesting thing about discussing um production of a remote control for me is that l as you point out, I just don't think of remote controls as somethin something people consciously assess in their purchasing habits. It's just like getting shoelaces with shoes or something. It just comes along.
+[00:12:48 - 00:12:48] B/PM: Yeah, yeah.
+[00:12:52 - 00:12:52] B/PM: Oh.
+[00:12:53 - 00:12:57] B/PM: Five minutes to end of meeting. Oh, okay. We're a bit behind.
+[00:12:56 - 00:13:14] D/ME: Do you know what I mean? Like so sort of like how do you I I mean one one way of looking at it would be, well the people producing television sets, maybe they have to buy remote controls. Or another way is maybe people who have T_V_ sets are really fed up with their remote control and they really want a better one or something.
+[00:12:57 - 00:12:58] C/UI: Yeah.
+[00:12:58 - 00:12:58] A/ID: Yeah.
+[00:13:12 - 00:13:13] C/UI: I know um
+[00:13:14 - 00:13:15] D/ME: But
+[00:13:14 - 00:13:24] C/UI: My parents went out and bought um remote controls because um they got fed up of having four or five different remote controls for each things the house. So um for them it was just how many devices control.
+[00:13:20 - 00:13:22] D/ME: Right. Right. Okay so
+[00:13:24 - 00:13:30] D/ME: Right, so in function one of the priorities might be to combine as many uses
+[00:13:26 - 00:13:27] B/PM: Yeah.
+[00:13:31 - 00:13:41] B/PM: Right, so do you think that should be like a main design aim of our remote control d you know, do your your satellite and your regular telly and your V_C_R_ and everything?
+[00:13:35 - 00:13:37] D/ME: I think so. Yeah, yeah.
+[00:13:38 - 00:13:39] D/ME: Yeah.
+[00:13:40 - 00:13:54] D/ME: Well like um, maybe what we could use is a sort of like a example of a successful other piece technology is palm palm pilots. They're gone from being just like little sort of scribble boards to cameras, M_P_ three players, telephones,
+[00:13:53 - 00:13:53] B/PM: Mm-hmm.
+[00:13:55 - 00:14:04] D/ME: everything, agenda. So, like, I wonder if we might add something new to the to the remote control market, such as the lighting in your house, or um
+[00:14:00 - 00:14:01] B/PM: Yeah.
+[00:14:04 - 00:14:13] B/PM: Or even like, you know, notes about um what you wanna watch. Like you might put in there oh I want to watch such and such and look a Oh that's a good idea. So extra functionalities.
+[00:14:09 - 00:14:11] D/ME: Yeah, yeah. An
+[00:14:13 - 00:14:30] D/ME: Yeah. Like, p personally for me, at home I've I've combined the um the audio video of my television set and my D_V_D_ player and my C_D_ player. So they w all work actually function together but I have different remote controls for each of them. So it's sort of ironic that that then they're in there
+[00:14:26 - 00:14:27] B/PM: Mm-hmm.
+[00:14:32 - 00:14:33] D/ME: um
+[00:14:34 - 00:14:38] D/ME: you know, the sound and everything it's just one system. But each one's got its own little
+[00:14:37 - 00:14:38] B/PM: Hmm.
+[00:14:39 - 00:14:39] D/ME: part.
+[00:14:42 - 00:15:03] B/PM: Um okay, uh I'd wel we're gonna have to wrap up pretty quickly in the next couple of minutes. Um I'll just check we've nothing else. Okay. Um so anything else anybody wants to add about what they don't like about remote controls they've used, what they would really like to be part of this new one at all?
+[00:15:03 - 00:15:04] A/ID: And you keep losing them.
+[00:15:04 - 00:15:06] B/PM: You keep losing them. Okay.
+[00:15:05 - 00:15:05] D/ME: Mm.
+[00:15:06 - 00:15:14] A/ID: Finding them is really a pain, you know. I mean it's usually quite small, or when you want it right, it slipped behind the couch or it's kicked under the table.
+[00:15:07 - 00:15:09] D/ME: Mm. Mm.
+[00:15:11 - 00:15:12] D/ME: Mm-hmm. Mm-hmm.
+[00:15:13 - 00:15:23] B/PM: Yeah. W You get those ones where you can, if you like, whistle or make a really high pitched noise they beep. There I mean is that something we'd want to include, do you think?
+[00:15:13 - 00:15:14] D/ME: Yeah.
+[00:15:15 - 00:15:15] D/ME: Yeah.
+[00:15:15 - 00:15:16] A/ID: You know.
+[00:15:16 - 00:15:17] D/ME: That's just really good id
+[00:15:19 - 00:15:20] D/ME: Yep.
+[00:15:24 - 00:15:53] D/ME: Uh, sure. I remember when the first remote control my my family had was on a cable. Actually had a cable between it and the T_V_ and big like buttons that sort of like, like on a blender or something. And um, you know, when I think about what they are now, it's better, but actually it's still kind of, I dunno, like a massive junky thing on the table. Maybe we could think about how, could be more, you know, streamlined. S
+[00:15:25 - 00:15:28] B/PM: Dunno. Okay maybe.
+[00:15:37 - 00:15:38] B/PM: My goodness.
+[00:15:46 - 00:15:48] B/PM: Still feels quite primitive.
+[00:15:51 - 00:15:53] B/PM: Maybe like a touch screen or something?
+[00:15:53 - 00:15:56] D/ME: Something like that, yeah. Or whatever would be technologically reasonable.
+[00:15:54 - 00:15:55] B/PM: Okay.
+[00:15:56 - 00:16:00] B/PM: Uh-huh, okay. Well I guess that's up to our industrial designer.
+[00:15:58 - 00:16:13] D/ME: 'Cause it could b it could it could be that f it could be that functionally that doesn't make it any better, but that just the appeal of of not having You know, these days there's a r pe things in people's homes are becoming more and more like chic, you know. Um, nicer materials and might be
+[00:16:02 - 00:16:03] B/PM: It looks better.
+[00:16:09 - 00:16:10] B/PM: Yeah.
+[00:16:12 - 00:16:13] B/PM: Okay.
+[00:16:15 - 00:16:16] B/PM: Okay.
+[00:16:16 - 00:16:17] D/ME: be worth exploring anyway.
+[00:16:16 - 00:16:17] C/UI: Uh.
+[00:16:17 - 00:16:49] B/PM: Right, well um so just to wrap up, the next meeting's gonna be in thirty minutes. So that's about um about ten to twelve by my watch. Um so inbetween now and then, um as the industrial designer, you're gonna be working on you know the actual working design of it so y you know what you're doing there. Um for user interface, technical functions, I guess that's you know like what we've been talking about, what it'll actually do. Um and uh marketing executive,
+[00:16:34 - 00:16:34] A/ID: Yep.
+[00:16:50 - 00:16:59] B/PM: you'll be just thinking about what it actually what, you know, what requirements it has to has to fulfil and you'll all get instructions emailed to you, I guess.
+[00:17:00 - 00:17:00] D/ME: Okay.
+[00:17:01 - 00:17:03] B/PM: Um.
+[00:17:08 - 00:17:12] B/PM: Yeah, so it's th the functional design stage is next, I guess.
+[00:17:14 - 00:17:15] B/PM: And uh
+[00:17:16 - 00:17:18] B/PM: and that's the end of the meeting.
+[00:17:19 - 00:17:23] B/PM: So I got that little message a lot sooner than I thought I would, so
+[00:17:19 - 00:17:21] D/ME: Um.
+[00:17:27 - 00:17:37] D/ME: Before we wrap up, just to make sure we're all on the same page here, um, do we We were given sort of an example of a coffee machine or something, right? Well,
+[00:17:29 - 00:17:30] B/PM: Mm-hmm.
+[00:17:36 - 00:17:38] B/PM: Uh-huh, yeah.
+[00:17:37 - 00:17:37] A/ID: Mm-hmm.
+[00:17:39 - 00:17:39] D/ME: um
+[00:17:41 - 00:17:55] D/ME: are we at ma right now on the assumption that our television remote control may have features which go beyond the television? Or are we keeping sort of like a a design commitment to television features? I I don't know.
+[00:17:49 - 00:17:49] B/PM: Th
+[00:17:54 - 00:18:05] B/PM: Okay, well just very quickly 'cause this we're supposed to finish now. Um I guess that's up to us, I mean you probably want some kind of unique selling point of it, so um, you know
+[00:17:57 - 00:17:58] D/ME: Yep. Yeah, sure.
+[00:18:02 - 00:18:02] D/ME: Okay.
+[00:18:04 - 00:18:07] A/ID: I think one factor would be production cost.
+[00:18:07 - 00:18:08] D/ME: Okay, yeah.
+[00:18:07 - 00:18:15] A/ID: Because there's a cap there, so um depends on how much you can cram into that price. Um.
+[00:18:08 - 00:18:08] B/PM: Yeah.
+[00:18:10 - 00:18:10] D/ME: Okay.
+[00:18:14 - 00:18:14] B/PM: Mm-hmm.
+[00:18:14 - 00:18:14] D/ME: Okay.
+[00:18:16 - 00:18:18] A/ID: I think that that's the main factor.
+[00:18:16 - 00:18:16] B/PM: Yeah.
+[00:18:18 - 00:18:23] B/PM: Okay. Right, okay, we'll that's that's the end of the meeting, then. Um.
+[00:18:18 - 00:18:19] D/ME: Okay.
+[00:18:22 - 00:18:23] D/ME: Alright.
+[00:18:24 - 00:18:26] B/PM: So, uh
+[00:18:27 - 00:18:30] B/PM: thank you all for coming.
+[00:18:28 - 00:18:29] A/ID: Cool.
