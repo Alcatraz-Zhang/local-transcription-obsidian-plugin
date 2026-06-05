@@ -25,6 +25,7 @@ vi.mock("obsidian", () => {
     addCommand = vi.fn();
     addRibbonIcon = vi.fn();
     addSettingTab = vi.fn();
+    registerEvent = vi.fn();
     loadData = vi.fn();
     saveData = vi.fn();
   }
@@ -98,6 +99,7 @@ class FakeVault {
 
   adapter = {
     exists: vi.fn(async (path: string) => this.files.has(path) || this.folders.has(path)),
+    readBinary: vi.fn(async (path: string) => new TextEncoder().encode(this.files.get(path) ?? "").buffer),
     writeBinary: vi.fn()
   };
 
@@ -152,11 +154,46 @@ class FakeVault {
 function createFakeApp(vault = new FakeVault()) {
   return {
     vault,
+    workspace: {
+      on: vi.fn()
+    },
     secretStorage: {
       getSecret: vi.fn(),
       setSecret: vi.fn()
     }
   };
+}
+
+class FakeMenuItem {
+  title = "";
+  icon = "";
+  callback: (() => void | Promise<void>) | undefined;
+
+  setTitle(title: string): this {
+    this.title = title;
+    return this;
+  }
+
+  setIcon(icon: string): this {
+    this.icon = icon;
+    return this;
+  }
+
+  onClick(callback: () => void | Promise<void>): this {
+    this.callback = callback;
+    return this;
+  }
+}
+
+class FakeMenu {
+  items: FakeMenuItem[] = [];
+
+  addItem(callback: (item: FakeMenuItem) => void): this {
+    const item = new FakeMenuItem();
+    callback(item);
+    this.items.push(item);
+    return this;
+  }
 }
 
 function largeSpeakerProfiles(count: number) {
@@ -189,6 +226,53 @@ describe("DEFAULT_SETTINGS speaker workflow fields", () => {
     expect(DEFAULT_SETTINGS.speakerProfilesPath).toBe(".local-transcription/speakers.json");
     expect(DEFAULT_SETTINGS.autoApplySpeakerConfidence).toBe(0.85);
     expect(DEFAULT_SETTINGS.suggestSpeakerConfidence).toBe(0.65);
+  });
+});
+
+describe("file context menu transcription", () => {
+  it("adds a transcribe action for audio files and transcribes the selected vault file", async () => {
+    const vault = new FakeVault();
+    vault.files.set("Recordings/Audio/meeting.wav", "audio bytes");
+    const app = createFakeApp(vault);
+    const plugin = new LocalTranscriptionPlugin(app as never, {} as never);
+    const transcribeBlob = vi
+      .spyOn(
+        plugin as unknown as {
+          transcribeBlob(blob: Blob, sourceName: string): Promise<void>;
+        },
+        "transcribeBlob"
+      )
+      .mockResolvedValue(undefined);
+
+    await plugin.onload();
+
+    expect(app.workspace.on).toHaveBeenCalledWith("file-menu", expect.any(Function));
+    expect(plugin.registerEvent).toHaveBeenCalledTimes(1);
+    const callback = app.workspace.on.mock.calls[0][1] as (menu: FakeMenu, file: TFile) => void;
+    const menu = new FakeMenu();
+    callback(menu, fakeTFile("Recordings/Audio/meeting.wav"));
+
+    expect(menu.items).toHaveLength(1);
+    expect(menu.items[0].title).toBe("Transcribe audio file");
+    expect(menu.items[0].icon).toBe("mic");
+
+    await menu.items[0].callback?.();
+
+    expect(vault.adapter.readBinary).toHaveBeenCalledWith("Recordings/Audio/meeting.wav");
+    expect(transcribeBlob).toHaveBeenCalledWith(expect.any(Blob), "meeting.wav");
+  });
+
+  it("does not add a transcribe action for non-audio files", async () => {
+    const app = createFakeApp();
+    const plugin = new LocalTranscriptionPlugin(app as never, {} as never);
+
+    await plugin.onload();
+
+    const callback = app.workspace.on.mock.calls[0][1] as (menu: FakeMenu, file: TFile) => void;
+    const menu = new FakeMenu();
+    callback(menu, fakeTFile("Notes/meeting.md"));
+
+    expect(menu.items).toHaveLength(0);
   });
 });
 

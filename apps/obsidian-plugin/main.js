@@ -147,8 +147,8 @@ function safeNoteFileName(value) {
 }
 function defaultTitleFromFile(filename) {
   const lastSlash = Math.max(filename.lastIndexOf("/"), filename.lastIndexOf("\\"));
-  const basename = lastSlash >= 0 ? filename.slice(lastSlash + 1) : filename;
-  return basename.replace(/\.[^.]+$/, "") || "Meeting transcription";
+  const basename2 = lastSlash >= 0 ? filename.slice(lastSlash + 1) : filename;
+  return basename2.replace(/\.[^.]+$/, "") || "Meeting transcription";
 }
 
 // src/speakers.ts
@@ -846,6 +846,28 @@ var ObsidianVaultAdapter = class {
 function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
+var TRANSCRIBABLE_AUDIO_EXTENSIONS = /* @__PURE__ */ new Set([
+  "aac",
+  "flac",
+  "m4a",
+  "mp3",
+  "ogg",
+  "opus",
+  "wav",
+  "webm"
+]);
+function basename(path) {
+  const normalized = (0, import_obsidian.normalizePath)(path);
+  const slash = normalized.lastIndexOf("/");
+  return slash >= 0 ? normalized.slice(slash + 1) : normalized;
+}
+function isTranscribableAudioFile(file) {
+  if (!(file instanceof import_obsidian.TFile)) {
+    return false;
+  }
+  const extension = file.path.split(".").pop()?.toLowerCase() ?? "";
+  return TRANSCRIBABLE_AUDIO_EXTENSIONS.has(extension);
+}
 var StatusModal = class extends import_obsidian.Modal {
   constructor(app, status) {
     super(app);
@@ -905,6 +927,9 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
       name: "Local Transcription: Check Voiceprint Speakers",
       callback: () => this.checkVoiceprintSpeakers()
     });
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file) => this.addTranscribeFileMenuItem(menu, file))
+    );
     this.addRibbonIcon("mic", "Local Transcription", () => this.pickAndTranscribeFile());
   }
   async saveSettings() {
@@ -953,6 +978,18 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     this.statusModal = new StatusModal(this.app, message);
     this.statusModal.open();
     return this.statusModal;
+  }
+  addTranscribeFileMenuItem(menu, file) {
+    if (!isTranscribableAudioFile(file)) {
+      return;
+    }
+    menu.addItem((item) => {
+      item.setTitle("Transcribe audio file").setIcon("mic").onClick(() => this.transcribeVaultFile(file));
+    });
+  }
+  async transcribeVaultFile(file) {
+    const buffer = await this.app.vault.adapter.readBinary(file.path);
+    await this.transcribeBlob(new Blob([buffer]), basename(file.path));
   }
   async pickAndTranscribeFile() {
     const input = document.createElement("input");

@@ -7,7 +7,9 @@ import {
   Setting,
   TFile,
   TFolder,
-  normalizePath
+  normalizePath,
+  type Menu,
+  type TAbstractFile
 } from "obsidian";
 
 import { GatewayClient, type GatewayJob } from "./gatewayClient";
@@ -91,6 +93,31 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+const TRANSCRIBABLE_AUDIO_EXTENSIONS = new Set([
+  "aac",
+  "flac",
+  "m4a",
+  "mp3",
+  "ogg",
+  "opus",
+  "wav",
+  "webm"
+]);
+
+function basename(path: string): string {
+  const normalized = normalizePath(path);
+  const slash = normalized.lastIndexOf("/");
+  return slash >= 0 ? normalized.slice(slash + 1) : normalized;
+}
+
+function isTranscribableAudioFile(file: TAbstractFile): file is TFile {
+  if (!(file instanceof TFile)) {
+    return false;
+  }
+  const extension = file.path.split(".").pop()?.toLowerCase() ?? "";
+  return TRANSCRIBABLE_AUDIO_EXTENSIONS.has(extension);
+}
+
 class StatusModal extends Modal {
   private statusEl: HTMLElement;
 
@@ -155,6 +182,9 @@ export default class LocalTranscriptionPlugin extends Plugin {
       name: "Local Transcription: Check Voiceprint Speakers",
       callback: () => this.checkVoiceprintSpeakers()
     });
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file) => this.addTranscribeFileMenuItem(menu, file))
+    );
     this.addRibbonIcon("mic", "Local Transcription", () => this.pickAndTranscribeFile());
   }
 
@@ -214,6 +244,23 @@ export default class LocalTranscriptionPlugin extends Plugin {
     this.statusModal = new StatusModal(this.app, message);
     this.statusModal.open();
     return this.statusModal;
+  }
+
+  private addTranscribeFileMenuItem(menu: Menu, file: TAbstractFile): void {
+    if (!isTranscribableAudioFile(file)) {
+      return;
+    }
+    menu.addItem((item) => {
+      item
+        .setTitle("Transcribe audio file")
+        .setIcon("mic")
+        .onClick(() => this.transcribeVaultFile(file));
+    });
+  }
+
+  private async transcribeVaultFile(file: TFile): Promise<void> {
+    const buffer = await this.app.vault.adapter.readBinary(file.path);
+    await this.transcribeBlob(new Blob([buffer]), basename(file.path));
   }
 
   private async pickAndTranscribeFile(): Promise<void> {
