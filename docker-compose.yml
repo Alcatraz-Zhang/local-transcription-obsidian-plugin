@@ -4,7 +4,7 @@ services:
   asr-gateway:
     build:
       context: ./services/gateway
-    image: local-transcription:0.2.0
+    image: local-transcription:0.2.1
     init: true
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-17003}:17003"
@@ -21,6 +21,7 @@ services:
       LANGUAGE: ${LANGUAGE:-auto}
       ENABLE_DIARIZATION: ${ENABLE_DIARIZATION:-true}
       ENABLE_TIMESTAMPS: ${ENABLE_TIMESTAMPS:-true}
+      ENABLE_FORCED_ALIGNER: ${ENABLE_FORCED_ALIGNER:-false}
       HF_HUB_DISABLE_XET: ${HF_HUB_DISABLE_XET:-1}
       HF_HOME: /root/.cache/huggingface
       MODELSCOPE_PATH: /root/.cache/modelscope/models

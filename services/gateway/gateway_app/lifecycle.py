@@ -94,6 +94,14 @@ class BackendLifecycle:
         return self._process is not None and self._process.poll() is None
 
     @property
+    def process_returncode(self) -> int | None:
+        with self._lock:
+            process = self._process
+        if process is None:
+            return None
+        return process.poll()
+
+    @property
     def active_tasks(self) -> int:
         with self._lock:
             return self._active_tasks
@@ -113,7 +121,16 @@ class BackendLifecycle:
             if not self.running:
                 self._process = self.popen(self.command)
             self._last_activity = self.now()
-        if not self.ready_check():
+        try:
+            ready = self.ready_check()
+        except Exception:
+            with self._lock:
+                process = self._process
+                self._process = None
+            if process is not None:
+                self._terminate_process_tree(process)
+            raise
+        if not ready:
             with self._lock:
                 process = self._process
                 self._process = None

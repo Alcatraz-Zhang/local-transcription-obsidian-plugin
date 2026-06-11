@@ -79,6 +79,9 @@ class QwenBackend:
         deadline = time.monotonic() + self.ready_timeout
         with httpx.Client(timeout=2) as client:
             while time.monotonic() < deadline:
+                returncode = self.lifecycle.process_returncode
+                if returncode is not None:
+                    raise RuntimeError(f"ASR backend exited before becoming ready (exit code {returncode})")
                 for path in ("/health", "/v1/models", "/stream/v1/asr/health"):
                     try:
                         if client.get(f"{self.backend_url}{path}").status_code == 200:
