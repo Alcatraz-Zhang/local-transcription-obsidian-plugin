@@ -104,6 +104,18 @@ const TRANSCRIBABLE_AUDIO_EXTENSIONS = new Set([
   "webm"
 ]);
 
+type RecordingFormat = {
+  mimeType: string;
+  extension: string;
+};
+
+const PREFERRED_RECORDING_FORMATS: RecordingFormat[] = [
+  { mimeType: "audio/mp4;codecs=mp4a.40.2", extension: "m4a" },
+  { mimeType: "audio/mp4", extension: "m4a" },
+  { mimeType: "audio/webm;codecs=opus", extension: "webm" },
+  { mimeType: "audio/webm", extension: "webm" }
+];
+
 function basename(path: string): string {
   const normalized = normalizePath(path);
   const slash = normalized.lastIndexOf("/");
@@ -147,6 +159,7 @@ export default class LocalTranscriptionPlugin extends Plugin {
   private recorder: MediaRecorder | null = null;
   private chunks: Blob[] = [];
   private statusModal: StatusModal | null = null;
+  private recordingRibbonIcon: HTMLElement | null = null;
 
   async onload(): Promise<void> {
     this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -185,7 +198,7 @@ export default class LocalTranscriptionPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => this.addTranscribeFileMenuItem(menu, file))
     );
-    this.addRibbonIcon("mic", "Local Transcription", () => this.pickAndTranscribeFile());
+    this.recordingRibbonIcon = this.addRibbonIcon("mic", "Local Transcription", () => this.toggleRecording());
   }
 
   async saveSettings(): Promise<void> {
@@ -277,25 +290,36 @@ export default class LocalTranscriptionPlugin extends Plugin {
     input.click();
   }
 
+  private async toggleRecording(): Promise<void> {
+    if (this.recorder && this.recorder.state !== "inactive") {
+      await this.stopRecordingAndTranscribe();
+      return;
+    }
+    await this.startRecording();
+  }
+
   private async startRecording(): Promise<void> {
     if (this.recorder && this.recorder.state !== "inactive") {
       new Notice("Already recording");
       return;
     }
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recording = this.createMediaRecorder(stream);
     this.chunks = [];
-    this.recorder = new MediaRecorder(stream);
+    this.recorder = recording.recorder;
     this.recorder.addEventListener("dataavailable", (event) => {
       if (event.data.size > 0) {
         this.chunks.push(event.data);
       }
     });
     this.recorder.start(1000);
+    this.recordingRibbonIcon?.classList.add("is-recording");
     new Notice("Recording started");
   }
 
   private async stopRecordingAndTranscribe(): Promise<void> {
     if (!this.recorder || this.recorder.state === "inactive") {
+      this.recordingRibbonIcon?.classList.remove("is-recording");
       new Notice("No active recording");
       return;
     }
@@ -312,15 +336,49 @@ export default class LocalTranscriptionPlugin extends Plugin {
       recorder.stop();
     });
     this.recorder = null;
-    const filename = `${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
+    this.recordingRibbonIcon?.classList.remove("is-recording");
+    const extension = this.recordingExtensionFromMimeType(blob.type || recorder.mimeType);
+    const filename = this.createRecordingFilename(extension);
     await this.transcribeBlob(blob, filename);
   }
 
+  private createMediaRecorder(stream: MediaStream): { recorder: MediaRecorder; extension: string } {
+    for (const format of PREFERRED_RECORDING_FORMATS) {
+      if (!this.isRecordingMimeTypeSupported(format.mimeType)) {
+        continue;
+      }
+      try {
+        return {
+          recorder: new MediaRecorder(stream, { mimeType: format.mimeType }),
+          extension: format.extension
+        };
+      } catch {
+        // Some Electron builds report support but still reject the constructor.
+      }
+    }
+    return {
+      recorder: new MediaRecorder(stream),
+      extension: "webm"
+    };
+  }
+
+  private isRecordingMimeTypeSupported(mimeType: string): boolean {
+    const isTypeSupported = MediaRecorder.isTypeSupported;
+    return typeof isTypeSupported === "function" && isTypeSupported.call(MediaRecorder, mimeType);
+  }
+
+  private recordingExtensionFromMimeType(mimeType: string): string {
+    return mimeType.toLowerCase().includes("mp4") ? "m4a" : "webm";
+  }
+
+  private createRecordingFilename(extension: string): string {
+    return `${new Date().toISOString().replace(/[:.]/g, "-")}.${extension}`;
+  }
+
   private async transcribeBlob(blob: Blob, sourceName: string): Promise<void> {
-    const modal = this.openStatus("Saving audio...");
+    new Notice("Transcription started");
     const title = defaultTitleFromFile(sourceName);
     const audioPath = await this.saveAudio(blob, sourceName);
-    modal.setStatus("Submitting transcription job...");
 
     const initialJob = await this.client().submitJob({
       blob,
@@ -329,17 +387,13 @@ export default class LocalTranscriptionPlugin extends Plugin {
       model: this.pluginSettings.asrModel,
       outputMode: this.pluginSettings.outputMode
     });
-    modal.setStatus(JSON.stringify(initialJob, null, 2));
 
-    const job = await this.client().waitForJob(initialJob.id, (update) => {
-      modal.setStatus(JSON.stringify(update, null, 2));
-    });
+    const job = await this.client().waitForJob(initialJob.id, () => undefined);
     if (job.status !== "completed" || !job.result) {
       throw new Error(job.error || "Transcription failed");
     }
 
     await this.createTranscriptNote(job, audioPath, title);
-    modal.setStatus(`Completed\n\n${JSON.stringify(job, null, 2)}`);
     new Notice("Transcription complete");
   }
 
@@ -348,6 +402,9 @@ export default class LocalTranscriptionPlugin extends Plugin {
     const audioPath = normalizePath(`${this.pluginSettings.audioSavePath}/${sourceName}`);
     const buffer = await blob.arrayBuffer();
     await this.app.vault.adapter.writeBinary(audioPath, buffer);
+    if (!(await this.app.vault.adapter.exists(audioPath))) {
+      throw new Error(`Audio file was not saved at ${audioPath}`);
+    }
     return audioPath;
   }
 
@@ -530,6 +587,16 @@ class LocalTranscriptionSettingTab extends PluginSettingTab {
             await this.plugin.setPostProcessingApiKey(value.trim());
           })
         );
+      new Setting(containerEl)
+        .setName("Post-processing prompt")
+        .addTextArea((text) => {
+          text.inputEl.rows = 14;
+          text.inputEl.addClass("local-transcription-post-processing-prompt");
+          text.setValue(this.plugin.pluginSettings.postProcessingPrompt).onChange(async (value) => {
+            this.plugin.pluginSettings.postProcessingPrompt = value;
+            await this.plugin.saveSettings();
+          });
+        });
       new Setting(containerEl)
         .setName("Keep original transcription")
         .addToggle((toggle) =>
