@@ -4,7 +4,20 @@ import LocalTranscriptionPlugin, { ObsidianVaultAdapter } from "./main";
 import { DEFAULT_SETTINGS } from "./settings";
 import type { GatewayJob } from "./gatewayClient";
 
+interface FakeClassList {
+  add: ReturnType<typeof vi.fn>;
+  remove: ReturnType<typeof vi.fn>;
+  contains: (className: string) => boolean;
+}
+
 const noticeMessages = vi.hoisted((): string[] => []);
+const settingInstances = vi.hoisted(
+  (): Array<{
+    name: string;
+    addTextArea: ReturnType<typeof vi.fn>;
+  }> => []
+);
+const ribbonIconElements = vi.hoisted((): Array<{ classList: FakeClassList }> => []);
 
 vi.mock("obsidian", () => {
   class TFile {
@@ -23,7 +36,22 @@ vi.mock("obsidian", () => {
     }
 
     addCommand = vi.fn();
-    addRibbonIcon = vi.fn();
+    addRibbonIcon = vi.fn(() => {
+      const classes = new Set<string>();
+      const element = {
+        classList: {
+          add: vi.fn((className: string) => {
+            classes.add(className);
+          }),
+          remove: vi.fn((className: string) => {
+            classes.delete(className);
+          }),
+          contains: (className: string) => classes.has(className)
+        }
+      };
+      ribbonIconElements.push(element);
+      return element;
+    });
     addSettingTab = vi.fn();
     registerEvent = vi.fn();
     loadData = vi.fn();
@@ -53,8 +81,16 @@ vi.mock("obsidian", () => {
   }
 
   class Setting {
-    constructor(public containerEl: unknown) {}
-    setName = vi.fn(() => this);
+    name = "";
+
+    constructor(public containerEl: unknown) {
+      settingInstances.push(this);
+    }
+
+    setName = vi.fn((name: string) => {
+      this.name = name;
+      return this;
+    });
     addText = vi.fn(() => this);
     addTextArea = vi.fn(() => this);
     addDropdown = vi.fn(() => this);
@@ -90,6 +126,7 @@ function fakeTFolder(path: string): TFolder {
 
 class FakeVault {
   files = new Map<string, string>();
+  binaryFiles = new Map<string, ArrayBuffer>();
   folders = new Set<string>();
   createdFolders: string[] = [];
   createdFiles: Array<{ path: string; content: string }> = [];
@@ -98,13 +135,21 @@ class FakeVault {
   readFailures = new Map<string, Error>();
 
   adapter = {
-    exists: vi.fn(async (path: string) => this.files.has(path) || this.folders.has(path)),
-    readBinary: vi.fn(async (path: string) => new TextEncoder().encode(this.files.get(path) ?? "").buffer),
-    writeBinary: vi.fn()
+    exists: vi.fn(async (path: string) => this.files.has(path) || this.binaryFiles.has(path) || this.folders.has(path)),
+    readBinary: vi.fn(async (path: string) => {
+      const binary = this.binaryFiles.get(path);
+      if (binary) {
+        return binary;
+      }
+      return new TextEncoder().encode(this.files.get(path) ?? "").buffer;
+    }),
+    writeBinary: vi.fn(async (path: string, buffer: ArrayBuffer) => {
+      this.binaryFiles.set(path, buffer);
+    })
   };
 
   getAbstractFileByPath(path: string): TFile | TFolder | null {
-    if (this.files.has(path)) {
+    if (this.files.has(path) || this.binaryFiles.has(path)) {
       return fakeTFile(path);
     }
     if (this.folders.has(path)) {
@@ -196,6 +241,48 @@ class FakeMenu {
   }
 }
 
+class FakeMediaRecorder {
+  static instances: FakeMediaRecorder[] = [];
+  static supportedMimeTypes = new Set<string>();
+
+  static isTypeSupported(mimeType: string): boolean {
+    return this.supportedMimeTypes.has(mimeType);
+  }
+
+  state = "inactive";
+  mimeType: string;
+  private listeners = new Map<string, Array<(event?: unknown) => void>>();
+
+  constructor(public stream: MediaStream, public options?: MediaRecorderOptions) {
+    this.mimeType = options?.mimeType ?? "audio/webm";
+    FakeMediaRecorder.instances.push(this);
+  }
+
+  addEventListener(type: string, listener: (event?: unknown) => void): void {
+    const listeners = this.listeners.get(type) ?? [];
+    listeners.push(listener);
+    this.listeners.set(type, listeners);
+  }
+
+  start(): void {
+    this.state = "recording";
+    this.dispatch("dataavailable", {
+      data: new Blob(["recorded audio"], { type: this.mimeType })
+    });
+  }
+
+  stop(): void {
+    this.state = "inactive";
+    this.dispatch("stop");
+  }
+
+  private dispatch(type: string, event?: unknown): void {
+    for (const listener of this.listeners.get(type) ?? []) {
+      listener(event);
+    }
+  }
+}
+
 function largeSpeakerProfiles(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     id: `vault-speaker-${index}`,
@@ -226,6 +313,63 @@ describe("DEFAULT_SETTINGS speaker workflow fields", () => {
     expect(DEFAULT_SETTINGS.speakerProfilesPath).toBe(".local-transcription/speakers.json");
     expect(DEFAULT_SETTINGS.autoApplySpeakerConfidence).toBe(0.85);
     expect(DEFAULT_SETTINGS.suggestSpeakerConfidence).toBe(0.65);
+  });
+
+  it("uses a Chinese default post-processing prompt focused on transcript cleanup", () => {
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("整理转录稿");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("emmm");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("语气词");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("只修改每行时间戳和说话人标签之后的正文");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("不要编造");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("保留专有名词");
+    expect(DEFAULT_SETTINGS.postProcessingPrompt).toContain("直接输出");
+  });
+});
+
+describe("settings tab post-processing controls", () => {
+  beforeEach(() => {
+    settingInstances.length = 0;
+  });
+
+  it("shows an editable post-processing prompt textarea when post-processing is enabled", async () => {
+    const app = createFakeApp();
+    const plugin = new LocalTranscriptionPlugin(app as never, {} as never);
+    plugin.loadData = vi.fn(async () => ({ postProcessingEnabled: true }));
+
+    await plugin.onload();
+
+    const addSettingTab = plugin.addSettingTab as unknown as { mock: { calls: Array<[{ display(): void }]> } };
+    const settingTab = addSettingTab.mock.calls[0][0];
+    settingTab.display();
+
+    const promptSetting = settingInstances.find((setting) => setting.name === "Post-processing prompt");
+    expect(promptSetting).toBeTruthy();
+    expect(promptSetting?.addTextArea).toHaveBeenCalledTimes(1);
+  });
+
+  it("places the post-processing prompt after API key and before original transcript toggle", async () => {
+    const app = createFakeApp();
+    const plugin = new LocalTranscriptionPlugin(app as never, {} as never);
+    plugin.loadData = vi.fn(async () => ({ postProcessingEnabled: true }));
+
+    await plugin.onload();
+
+    const addSettingTab = plugin.addSettingTab as unknown as { mock: { calls: Array<[{ display(): void }]> } };
+    const settingTab = addSettingTab.mock.calls[0][0];
+    settingTab.display();
+
+    const postProcessingNames = settingInstances
+      .map((setting) => setting.name)
+      .filter((name) => name.startsWith("Post-processing") || name === "Keep original transcription");
+
+    expect(postProcessingNames).toEqual([
+      "Post-processing",
+      "Post-processing endpoint",
+      "Post-processing model",
+      "Post-processing API key",
+      "Post-processing prompt",
+      "Keep original transcription"
+    ]);
   });
 });
 
@@ -273,6 +417,83 @@ describe("file context menu transcription", () => {
     callback(menu, fakeTFile("Notes/meeting.md"));
 
     expect(menu.items).toHaveLength(0);
+  });
+});
+
+describe("ribbon recording workflow", () => {
+  beforeEach(() => {
+    noticeMessages.length = 0;
+    ribbonIconElements.length = 0;
+    FakeMediaRecorder.instances = [];
+    FakeMediaRecorder.supportedMimeTypes = new Set(["audio/mp4;codecs=mp4a.40.2"]);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-12T08:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    noticeMessages.length = 0;
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("records from the ribbon icon, saves the audio attachment, and starts transcription on stop", async () => {
+    const vault = new FakeVault();
+    const app = createFakeApp(vault);
+    const plugin = new LocalTranscriptionPlugin(app as never, {} as never);
+    const stream = {
+      getTracks: vi.fn(() => [{ stop: vi.fn() }])
+    } as unknown as MediaStream;
+    const submitJob = vi.fn(async () => ({ id: "job-1", status: "queued" as const, result: null }));
+    const completedJob: GatewayJob = { id: "job-1", status: "completed", result: { text: "hello" } };
+    const waitForJob = vi.fn(async () => completedJob);
+    const createTranscriptNote = vi
+      .spyOn(
+        plugin as unknown as {
+          createTranscriptNote(job: GatewayJob, audioPath: string, title: string): Promise<void>;
+        },
+        "createTranscriptNote"
+      )
+      .mockResolvedValue(undefined);
+    vi.spyOn(plugin as unknown as { client(): unknown }, "client").mockReturnValue({
+      submitJob,
+      waitForJob
+    });
+    vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+    vi.stubGlobal("navigator", {
+      mediaDevices: {
+        getUserMedia: vi.fn(async () => stream)
+      }
+    });
+
+    await plugin.onload();
+
+    const addRibbonIcon = plugin.addRibbonIcon as unknown as {
+      mock: { calls: Array<[string, string, () => Promise<void>]> };
+    };
+    const ribbonCallback = addRibbonIcon.mock.calls[0][2];
+    const ribbonIcon = ribbonIconElements[0];
+    await ribbonCallback();
+    expect(ribbonIcon.classList.contains("is-recording")).toBe(true);
+    vi.setSystemTime(new Date("2026-06-12T08:05:00.000Z"));
+    await ribbonCallback();
+
+    const expectedFilename = "2026-06-12T08-05-00-000Z.m4a";
+    const expectedAudioPath = `Recordings/Audio/${expectedFilename}`;
+    expect(FakeMediaRecorder.instances[0]?.options).toEqual({ mimeType: "audio/mp4;codecs=mp4a.40.2" });
+    expect(vault.adapter.writeBinary).toHaveBeenCalledWith(expectedAudioPath, expect.any(ArrayBuffer));
+    expect(submitJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filename: expectedFilename,
+        language: "auto",
+        model: "auto",
+        outputMode: "speaker_timestamp"
+      })
+    );
+    expect(waitForJob).toHaveBeenCalledWith("job-1", expect.any(Function));
+    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, expectedAudioPath, "2026-06-12T08-05-00-000Z");
+    expect(ribbonIcon.classList.contains("is-recording")).toBe(false);
+    expect(noticeMessages).toEqual(["Recording started", "Transcription started", "Transcription complete"]);
   });
 });
 
@@ -333,6 +554,97 @@ describe("ObsidianVaultAdapter", () => {
     );
     expect(vault.createdFiles).toEqual([]);
     expect(vault.modifiedFiles).toEqual([]);
+  });
+});
+
+describe("transcription progress notifications", () => {
+  beforeEach(() => {
+    noticeMessages.length = 0;
+  });
+
+  afterEach(() => {
+    noticeMessages.length = 0;
+    vi.restoreAllMocks();
+  });
+
+  it("uses notices instead of a foreground modal while a transcription job runs", async () => {
+    const vault = new FakeVault();
+    const plugin = new LocalTranscriptionPlugin(createFakeApp(vault) as never, {} as never);
+    plugin.pluginSettings = { ...DEFAULT_SETTINGS, postProcessingEnabled: false };
+    const completedJob: GatewayJob = {
+      id: "job-1",
+      status: "completed",
+      result: { text: "hello" }
+    };
+    const submitJob = vi.fn(async () => ({ id: "job-1", status: "queued", result: null }));
+    const waitForJob = vi.fn(async (jobId: string, onUpdate: (job: GatewayJob) => void) => {
+      onUpdate({ id: jobId, status: "running", result: null });
+      return completedJob;
+    });
+    const openStatus = vi.spyOn(
+      plugin as unknown as { openStatus(message: string): unknown },
+      "openStatus"
+    );
+    const createTranscriptNote = vi
+      .spyOn(
+        plugin as unknown as {
+          createTranscriptNote(job: GatewayJob, audioPath: string, title: string): Promise<void>;
+        },
+        "createTranscriptNote"
+      )
+      .mockResolvedValue(undefined);
+    vi.spyOn(plugin as unknown as { client(): unknown }, "client").mockReturnValue({
+      submitJob,
+      waitForJob
+    });
+
+    await (
+      plugin as unknown as {
+        transcribeBlob(blob: Blob, sourceName: string): Promise<void>;
+      }
+    ).transcribeBlob(new Blob(["audio"]), "meeting.wav");
+
+    expect(openStatus).not.toHaveBeenCalled();
+    expect(noticeMessages).toEqual(["Transcription started", "Transcription complete"]);
+    expect(submitJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filename: "meeting.wav",
+        language: "auto",
+        model: "auto",
+        outputMode: "speaker_timestamp"
+      })
+    );
+    expect(waitForJob).toHaveBeenCalledWith("job-1", expect.any(Function));
+    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, "Recordings/Audio/meeting.wav", "meeting");
+  });
+
+  it("does not create a transcript when the audio attachment was not saved", async () => {
+    const vault = new FakeVault();
+    vault.adapter.writeBinary.mockResolvedValue(undefined);
+    const plugin = new LocalTranscriptionPlugin(createFakeApp(vault) as never, {} as never);
+    plugin.pluginSettings = { ...DEFAULT_SETTINGS, postProcessingEnabled: false };
+    const createTranscriptNote = vi.spyOn(
+      plugin as unknown as {
+        createTranscriptNote(job: GatewayJob, audioPath: string, title: string): Promise<void>;
+      },
+      "createTranscriptNote"
+    );
+    const submitJob = vi.fn();
+    vi.spyOn(plugin as unknown as { client(): unknown }, "client").mockReturnValue({
+      submitJob,
+      waitForJob: vi.fn()
+    });
+
+    await expect(
+      (
+        plugin as unknown as {
+          transcribeBlob(blob: Blob, sourceName: string): Promise<void>;
+        }
+      ).transcribeBlob(new Blob(["audio"]), "missing.wav")
+    ).rejects.toThrow("Audio file was not saved at Recordings/Audio/missing.wav");
+
+    expect(submitJob).not.toHaveBeenCalled();
+    expect(createTranscriptNote).not.toHaveBeenCalled();
   });
 });
 
