@@ -117,6 +117,24 @@ var GatewayClient = class {
 
 // src/settings.ts
 var POST_PROCESSING_SECRET_ID = "local-transcription-post-processing-api-key";
+var DEFAULT_POST_PROCESSING_PROMPT = [
+  "\u8BF7\u4F5C\u4E3A\u8F6C\u5F55\u7A3F\u7F16\u8F91\u5668\u6574\u7406\u8F6C\u5F55\u7A3F\uFF0C\u76EE\u6807\u662F\u628A\u53E3\u8BED\u8F6C\u5F55\u6574\u7406\u6210\u9002\u5408\u76F4\u63A5\u9605\u8BFB\u7684\u8BB0\u5F55\u7A3F\uFF0C\u540C\u65F6\u4FDD\u7559\u539F\u610F\u3001\u8BED\u8A00\u3001\u8BED\u6C14\u5F3A\u5F31\u548C\u8BF4\u8BDD\u4EBA\u7684\u8868\u8FBE\u91CD\u70B9\u3002",
+  "\u7F16\u8F91\u8303\u56F4\uFF1A",
+  "1. \u53EA\u4FEE\u6539\u6BCF\u884C\u65F6\u95F4\u6233\u548C\u8BF4\u8BDD\u4EBA\u6807\u7B7E\u4E4B\u540E\u7684\u6B63\u6587\uFF1B\u65F6\u95F4\u6233\u3001\u8BF4\u8BDD\u4EBA\u540D\u79F0\u3001\u884C\u987A\u5E8F\u548C\u4E00\u884C\u4E00\u4E2A\u53D1\u8A00\u7247\u6BB5\u7684\u7ED3\u6784\u5FC5\u987B\u4FDD\u7559\u3002",
+  "2. \u5982\u679C\u539F\u6587\u6CA1\u6709\u65F6\u95F4\u6233\u6216\u8BF4\u8BDD\u4EBA\u6807\u7B7E\uFF0C\u4E5F\u4E0D\u8981\u65B0\u589E\u6807\u7B7E\u3002",
+  "\u9700\u8981\u4FEE\u6539\uFF1A",
+  "3. \u4FEE\u6B63\u660E\u663E\u7684\u9519\u522B\u5B57\u3001\u540C\u97F3\u8BEF\u8BC6\u522B\u3001\u6807\u70B9\u3001\u65AD\u53E5\u3001\u5927\u5C0F\u5199\u548C\u65E0\u610F\u4E49\u91CD\u590D\uFF0C\u8BA9\u53E5\u5B50\u81EA\u7136\u901A\u987A\u3002",
+  "4. \u5220\u9664\u4E0D\u5F71\u54CD\u542B\u4E49\u7684\u8BED\u6C14\u8BCD\u3001\u62D6\u5EF6\u8BCD\u3001\u586B\u5145\u8BCD\u3001\u53E3\u5934\u7985\u548C\u53E3\u5403\uFF0C\u4F8B\u5982 emmm\u3001\u55EF\u3001\u5443\u3001\u554A\u3001\u561B\u3001ma\u3001a\u3001\u8FD9\u4E2A\u3001\u5C31\u662F\u3001\u7136\u540E\u7136\u540E\u3001\u6211\u6211\u6211 \u7B49\u3002",
+  "5. \u6E05\u7406\u660E\u663E\u7684\u81EA\u6211\u7EA0\u6B63\u548C\u5E9F\u8BDD\u7247\u6BB5\uFF0C\u4F8B\u5982\u201C\u4E0D\u662F\u4E0D\u662F\u201D\u201C\u7B49\u4E00\u4E0B\u6211\u91CD\u8BF4\u201D\uFF1B\u4F46\u5982\u679C\u8FD9\u4E9B\u5185\u5BB9\u8868\u8FBE\u771F\u5B9E\u6001\u5EA6\u3001\u72B9\u8C6B\u3001\u5426\u5B9A\u3001\u5F3A\u8C03\u6216\u60C5\u7EEA\uFF0C\u8BF7\u4FDD\u7559\u3002",
+  "6. \u4FDD\u7559\u4E13\u6709\u540D\u8BCD\u3001\u4EBA\u540D\u3001\u9879\u76EE\u540D\u3001\u672F\u8BED\u3001\u6570\u5B57\u3001\u65E5\u671F\u3001\u91D1\u989D\u3001\u4EE3\u7801\u3001\u547D\u4EE4\u3001URL \u548C\u5F15\u7528\u5185\u5BB9\uFF1B\u4E2D\u82F1\u6DF7\u6742\u5185\u5BB9\u4E0D\u8981\u64C5\u81EA\u7FFB\u8BD1\u6216\u66FF\u6362\u3002",
+  "7. \u53EF\u4EE5\u5408\u5E76\u8FC7\u77ED\u788E\u53E5\u6216\u8865\u5145\u5FC5\u8981\u6807\u70B9\uFF0C\u4F46\u4E0D\u8981\u6539\u53D8\u539F\u6BB5\u843D\u987A\u5E8F\uFF0C\u4E0D\u8981\u628A\u8F6C\u5F55\u7A3F\u6539\u6210\u6458\u8981\u3001\u4F1A\u8BAE\u7EAA\u8981\u3001\u5F85\u529E\u4E8B\u9879\u6216\u5217\u8868\u3002",
+  "\u7981\u6B62\uFF1A",
+  "8. \u4E0D\u8981\u7F16\u9020\u539F\u6587\u6CA1\u6709\u7684\u4FE1\u606F\uFF0C\u4E0D\u8981\u8865\u5145\u80CC\u666F\u77E5\u8BC6\uFF0C\u4E0D\u8981\u52A0\u5165\u8BC4\u4EF7\u3001\u89E3\u91CA\u3001\u6807\u9898\u3001\u7ED3\u8BBA\u6216\u884C\u52A8\u9879\u3002",
+  "9. \u4E0D\u8981\u6539\u53D8\u8BF4\u8BDD\u4EBA\u5F52\u5C5E\uFF0C\u4E0D\u8981\u5220\u9664\u6709\u5B9E\u8D28\u4FE1\u606F\u7684\u91CD\u590D\u3001\u505C\u987F\u3001\u53CD\u95EE\u3001\u5F3A\u8C03\u6216\u4E0D\u786E\u5B9A\u8868\u8FBE\u3002",
+  "10. \u4E0D\u8981\u8F93\u51FA\u5904\u7406\u8BF4\u660E\u3001Markdown \u5305\u88F9\u3001\u524D\u8A00\u6216\u540E\u8BB0\u3002",
+  "\u8F93\u51FA\uFF1A",
+  "\u76F4\u63A5\u8F93\u51FA\u6574\u7406\u540E\u7684\u8F6C\u5F55\u7A3F\u3002"
+].join("\n");
 var DEFAULT_SETTINGS = {
   gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
@@ -132,7 +150,7 @@ var DEFAULT_SETTINGS = {
   postProcessingEnabled: false,
   postProcessingUrl: "https://api.openai.com/v1/chat/completions",
   postProcessingModel: "",
-  postProcessingPrompt: "You are a transcription editor. Clean up grammar and readability while preserving the original meaning and language.",
+  postProcessingPrompt: DEFAULT_POST_PROCESSING_PROMPT,
   keepOriginalTranscription: true
 };
 
@@ -386,7 +404,7 @@ function transcriptText(payload, mode, speakerMap) {
 function buildPostProcessingPrompt(userPrompt) {
   return [
     userPrompt.trim(),
-    "preserve every timestamp and speaker label exactly. Lines may begin like [00:00:00 - 00:00:05] Speaker1:. Keep those prefixes unchanged and keep one utterance per line. Return only the polished transcript."
+    "\u8BF7\u4E25\u683C\u4FDD\u7559\u6BCF\u4E00\u884C\u5F00\u5934\u7684\u65F6\u95F4\u6233\u548C\u8BF4\u8BDD\u4EBA\u6807\u7B7E\u3002\u884C\u9996\u53EF\u80FD\u7C7B\u4F3C [00:00:00 - 00:00:05] Speaker1:\uFF0C\u8FD9\u4E9B\u524D\u7F00\u5FC5\u987B\u539F\u6837\u4FDD\u7559\u3002\u4FDD\u6301\u6BCF\u884C\u4E00\u4E2A\u53D1\u8A00\u7247\u6BB5\u3002\u53EA\u8FD4\u56DE\u5904\u7406\u540E\u7684\u8F6C\u5F55\u7A3F\uFF0C\u4E0D\u8981\u8F93\u51FA\u4EFB\u4F55\u989D\u5916\u5185\u5BB9\u3002"
   ].filter(Boolean).join("\n\n");
 }
 function mergeProcessedTranscript(processed, raw, keepOriginal) {
@@ -856,6 +874,12 @@ var TRANSCRIBABLE_AUDIO_EXTENSIONS = /* @__PURE__ */ new Set([
   "wav",
   "webm"
 ]);
+var PREFERRED_RECORDING_FORMATS = [
+  { mimeType: "audio/mp4;codecs=mp4a.40.2", extension: "m4a" },
+  { mimeType: "audio/mp4", extension: "m4a" },
+  { mimeType: "audio/webm;codecs=opus", extension: "webm" },
+  { mimeType: "audio/webm", extension: "webm" }
+];
 function basename(path) {
   const normalized = (0, import_obsidian.normalizePath)(path);
   const slash = normalized.lastIndexOf("/");
@@ -894,6 +918,7 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
   recorder = null;
   chunks = [];
   statusModal = null;
+  recordingRibbonIcon = null;
   async onload() {
     this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     this.addSettingTab(new LocalTranscriptionSettingTab(this.app, this));
@@ -930,7 +955,7 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => this.addTranscribeFileMenuItem(menu, file))
     );
-    this.addRibbonIcon("mic", "Local Transcription", () => this.pickAndTranscribeFile());
+    this.recordingRibbonIcon = this.addRibbonIcon("mic", "Local Transcription", () => this.toggleRecording());
   }
   async saveSettings() {
     await this.saveData(this.pluginSettings);
@@ -1004,24 +1029,34 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     };
     input.click();
   }
+  async toggleRecording() {
+    if (this.recorder && this.recorder.state !== "inactive") {
+      await this.stopRecordingAndTranscribe();
+      return;
+    }
+    await this.startRecording();
+  }
   async startRecording() {
     if (this.recorder && this.recorder.state !== "inactive") {
       new import_obsidian.Notice("Already recording");
       return;
     }
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recording = this.createMediaRecorder(stream);
     this.chunks = [];
-    this.recorder = new MediaRecorder(stream);
+    this.recorder = recording.recorder;
     this.recorder.addEventListener("dataavailable", (event) => {
       if (event.data.size > 0) {
         this.chunks.push(event.data);
       }
     });
     this.recorder.start(1e3);
+    this.recordingRibbonIcon?.classList.add("is-recording");
     new import_obsidian.Notice("Recording started");
   }
   async stopRecordingAndTranscribe() {
     if (!this.recorder || this.recorder.state === "inactive") {
+      this.recordingRibbonIcon?.classList.remove("is-recording");
       new import_obsidian.Notice("No active recording");
       return;
     }
@@ -1038,14 +1073,43 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
       recorder.stop();
     });
     this.recorder = null;
-    const filename = `${(/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-")}.webm`;
+    this.recordingRibbonIcon?.classList.remove("is-recording");
+    const extension = this.recordingExtensionFromMimeType(blob.type || recorder.mimeType);
+    const filename = this.createRecordingFilename(extension);
     await this.transcribeBlob(blob, filename);
   }
+  createMediaRecorder(stream) {
+    for (const format of PREFERRED_RECORDING_FORMATS) {
+      if (!this.isRecordingMimeTypeSupported(format.mimeType)) {
+        continue;
+      }
+      try {
+        return {
+          recorder: new MediaRecorder(stream, { mimeType: format.mimeType }),
+          extension: format.extension
+        };
+      } catch {
+      }
+    }
+    return {
+      recorder: new MediaRecorder(stream),
+      extension: "webm"
+    };
+  }
+  isRecordingMimeTypeSupported(mimeType) {
+    const isTypeSupported = MediaRecorder.isTypeSupported;
+    return typeof isTypeSupported === "function" && isTypeSupported.call(MediaRecorder, mimeType);
+  }
+  recordingExtensionFromMimeType(mimeType) {
+    return mimeType.toLowerCase().includes("mp4") ? "m4a" : "webm";
+  }
+  createRecordingFilename(extension) {
+    return `${(/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-")}.${extension}`;
+  }
   async transcribeBlob(blob, sourceName) {
-    const modal = this.openStatus("Saving audio...");
+    new import_obsidian.Notice("Transcription started");
     const title = defaultTitleFromFile(sourceName);
     const audioPath = await this.saveAudio(blob, sourceName);
-    modal.setStatus("Submitting transcription job...");
     const initialJob = await this.client().submitJob({
       blob,
       filename: sourceName,
@@ -1053,17 +1117,11 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
       model: this.pluginSettings.asrModel,
       outputMode: this.pluginSettings.outputMode
     });
-    modal.setStatus(JSON.stringify(initialJob, null, 2));
-    const job = await this.client().waitForJob(initialJob.id, (update) => {
-      modal.setStatus(JSON.stringify(update, null, 2));
-    });
+    const job = await this.client().waitForJob(initialJob.id, () => void 0);
     if (job.status !== "completed" || !job.result) {
       throw new Error(job.error || "Transcription failed");
     }
     await this.createTranscriptNote(job, audioPath, title);
-    modal.setStatus(`Completed
-
-${JSON.stringify(job, null, 2)}`);
     new import_obsidian.Notice("Transcription complete");
   }
   async saveAudio(blob, sourceName) {
@@ -1071,6 +1129,9 @@ ${JSON.stringify(job, null, 2)}`);
     const audioPath = (0, import_obsidian.normalizePath)(`${this.pluginSettings.audioSavePath}/${sourceName}`);
     const buffer = await blob.arrayBuffer();
     await this.app.vault.adapter.writeBinary(audioPath, buffer);
+    if (!await this.app.vault.adapter.exists(audioPath)) {
+      throw new Error(`Audio file was not saved at ${audioPath}`);
+    }
     return audioPath;
   }
   async createTranscriptNote(job, audioPath, title) {
@@ -1218,6 +1279,14 @@ var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTa
           await this.plugin.setPostProcessingApiKey(value.trim());
         })
       );
+      new import_obsidian.Setting(containerEl).setName("Post-processing prompt").addTextArea((text) => {
+        text.inputEl.rows = 14;
+        text.inputEl.addClass("local-transcription-post-processing-prompt");
+        text.setValue(this.plugin.pluginSettings.postProcessingPrompt).onChange(async (value) => {
+          this.plugin.pluginSettings.postProcessingPrompt = value;
+          await this.plugin.saveSettings();
+        });
+      });
       new import_obsidian.Setting(containerEl).setName("Keep original transcription").addToggle(
         (toggle) => toggle.setValue(this.plugin.pluginSettings.keepOriginalTranscription).onChange(async (value) => {
           this.plugin.pluginSettings.keepOriginalTranscription = value;

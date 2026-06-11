@@ -1,7 +1,7 @@
 export function buildPostProcessingPrompt(userPrompt: string): string {
   return [
     userPrompt.trim(),
-    "preserve every timestamp and speaker label exactly. Lines may begin like [00:00:00 - 00:00:05] Speaker1:. Keep those prefixes unchanged and keep one utterance per line. Return only the polished transcript."
+    "请严格保留每一行开头的时间戳和说话人标签。行首可能类似 [00:00:00 - 00:00:05] Speaker1:，这些前缀必须原样保留。保持每行一个发言片段。只返回处理后的转录稿，不要输出任何额外内容。"
   ]
     .filter(Boolean)
     .join("\n\n");

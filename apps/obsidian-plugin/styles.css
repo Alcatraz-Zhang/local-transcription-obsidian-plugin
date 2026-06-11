@@ -2,3 +2,28 @@
   white-space: pre-wrap;
 }
 
+.local-transcription-post-processing-prompt {
+  min-height: 14rem;
+  width: min(100%, 36rem);
+}
+
+.workspace-ribbon .clickable-icon.is-recording {
+  color: var(--text-on-accent);
+  background-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 35%, transparent);
+}
+
+.workspace-ribbon .clickable-icon.is-recording svg {
+  animation: local-transcription-recording-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes local-transcription-recording-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+}
