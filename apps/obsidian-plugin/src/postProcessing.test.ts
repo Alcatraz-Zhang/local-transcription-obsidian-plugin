@@ -3,10 +3,11 @@ import { buildPostProcessingPrompt, mergeProcessedTranscript } from "./postProce
 
 describe("buildPostProcessingPrompt", () => {
   it("always instructs the model to preserve timestamp and speaker prefixes", () => {
-    const prompt = buildPostProcessingPrompt("Clean grammar.");
+    const prompt = buildPostProcessingPrompt("整理转录稿。");
 
-    expect(prompt).toContain("Clean grammar.");
-    expect(prompt).toContain("preserve every timestamp and speaker label exactly");
+    expect(prompt).toContain("整理转录稿。");
+    expect(prompt).toContain("严格保留每一行开头的时间戳和说话人标签");
+    expect(prompt).toContain("只返回处理后的转录稿");
   });
 });
 
@@ -19,4 +20,3 @@ describe("mergeProcessedTranscript", () => {
     expect(mergeProcessedTranscript("polished", "raw", false)).toBe("polished");
   });
 });
-
