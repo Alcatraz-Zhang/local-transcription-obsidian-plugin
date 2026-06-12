@@ -11,3 +11,5 @@ temp/
 data/
 *.egg-info/
 .worktrees/
+.omo/
+graphify-out/
