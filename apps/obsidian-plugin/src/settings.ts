@@ -12,6 +12,8 @@ export interface LocalTranscriptionSettings {
   outputMode: OutputMode;
   language: string;
   asrModel: string;
+  titleGenerationEnabled: boolean;
+  titleGenerationPrompt: string;
   postProcessingEnabled: boolean;
   postProcessingUrl: string;
   postProcessingModel: string;
@@ -40,6 +42,14 @@ export const DEFAULT_POST_PROCESSING_PROMPT = [
   "直接输出整理后的转录稿。"
 ].join("\n");
 
+export const DEFAULT_TITLE_GENERATION_PROMPT = [
+  "请根据以下转录稿生成一个简洁、准确的笔记标题，直接表达内容主题。",
+  "要求：",
+  "1. 标题长度控制在 30 个汉字或 60 个字符以内。",
+  "2. 不要包含时间戳、说话人标签或无关修饰。",
+  "3. 不要返回解释、引号或 Markdown 格式，只返回标题文本本身。"
+].join("\n");
+
 export const DEFAULT_SETTINGS: LocalTranscriptionSettings = {
   gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
@@ -52,6 +62,8 @@ export const DEFAULT_SETTINGS: LocalTranscriptionSettings = {
   outputMode: "speaker_timestamp",
   language: "auto",
   asrModel: "auto",
+  titleGenerationEnabled: false,
+  titleGenerationPrompt: DEFAULT_TITLE_GENERATION_PROMPT,
   postProcessingEnabled: false,
   postProcessingUrl: "https://api.openai.com/v1/chat/completions",
   postProcessingModel: "",
