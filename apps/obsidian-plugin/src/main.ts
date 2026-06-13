@@ -21,6 +21,7 @@ import {
 import { expandTemplate, defaultTitleFromFile, safeNoteFileName } from "./template";
 import { normalizeSegments, transcriptText } from "./transcript";
 import { mergeProcessedTranscript, postProcessTranscript } from "./postProcessing";
+import { generateTitle } from "./titleGeneration";
 import { SpeakerStore, type VaultAdapter } from "./speakerStore";
 import { buildInitialSpeakerMap } from "./speakers";
 import {
@@ -377,7 +378,6 @@ export default class LocalTranscriptionPlugin extends Plugin {
 
   private async transcribeBlob(blob: Blob, sourceName: string): Promise<void> {
     new Notice("Transcription started");
-    const title = defaultTitleFromFile(sourceName);
     const audioPath = await this.saveAudio(blob, sourceName);
 
     const initialJob = await this.client().submitJob({
@@ -393,7 +393,7 @@ export default class LocalTranscriptionPlugin extends Plugin {
       throw new Error(job.error || "Transcription failed");
     }
 
-    await this.createTranscriptNote(job, audioPath, title);
+    await this.createTranscriptNote(job, audioPath, sourceName);
     new Notice("Transcription complete");
   }
 
@@ -408,7 +408,7 @@ export default class LocalTranscriptionPlugin extends Plugin {
     return audioPath;
   }
 
-  private async createTranscriptNote(job: GatewayJob, audioPath: string, title: string): Promise<void> {
+  private async createTranscriptNote(job: GatewayJob, audioPath: string, sourceName: string): Promise<void> {
     await this.ensureFolder(this.pluginSettings.transcriptSavePath);
     const result = job.result ?? {};
     const normalizedSegments = normalizeSegments(result);
@@ -433,6 +433,29 @@ export default class LocalTranscriptionPlugin extends Plugin {
         request: fetch
       });
       finalText = mergeProcessedTranscript(processed, rawText, this.pluginSettings.keepOriginalTranscription);
+    }
+
+    let title = defaultTitleFromFile(sourceName);
+    if (this.pluginSettings.titleGenerationEnabled) {
+      const apiKey = await this.getPostProcessingApiKey();
+      if (!apiKey) {
+        throw new Error("Post-processing API key is not configured");
+      }
+      try {
+        const generated = await generateTitle({
+          endpoint: this.pluginSettings.postProcessingUrl,
+          apiKey,
+          model: this.pluginSettings.postProcessingModel,
+          prompt: this.pluginSettings.titleGenerationPrompt,
+          transcript: finalText,
+          request: fetch
+        });
+        title = safeNoteFileName(generated);
+      } catch (error) {
+        new Notice(
+          `Title generation failed: ${error instanceof Error ? error.message : String(error)}. Using filename as title.`
+        );
+      }
     }
 
     const now = new Date();
@@ -605,6 +628,29 @@ class LocalTranscriptionSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
         );
+    }
+
+    new Setting(containerEl)
+      .setName("Auto-generate title")
+      .setDesc("Generate the note title from the transcript using the post-processing LLM.")
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.pluginSettings.titleGenerationEnabled).onChange(async (value) => {
+          this.plugin.pluginSettings.titleGenerationEnabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+    if (this.plugin.pluginSettings.titleGenerationEnabled) {
+      new Setting(containerEl)
+        .setName("Title generation prompt")
+        .addTextArea((text) => {
+          text.inputEl.rows = 10;
+          text.inputEl.addClass("local-transcription-title-generation-prompt");
+          text.setValue(this.plugin.pluginSettings.titleGenerationPrompt).onChange(async (value) => {
+            this.plugin.pluginSettings.titleGenerationPrompt = value;
+            await this.plugin.saveSettings();
+          });
+        });
     }
   }
 }

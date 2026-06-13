@@ -91,6 +91,7 @@ vi.mock("obsidian", () => {
       this.name = name;
       return this;
     });
+    setDesc = vi.fn(() => this);
     addText = vi.fn(() => this);
     addTextArea = vi.fn(() => this);
     addDropdown = vi.fn(() => this);
@@ -491,7 +492,7 @@ describe("ribbon recording workflow", () => {
       })
     );
     expect(waitForJob).toHaveBeenCalledWith("job-1", expect.any(Function));
-    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, expectedAudioPath, "2026-06-12T08-05-00-000Z");
+    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, expectedAudioPath, "2026-06-12T08-05-00-000Z.m4a");
     expect(ribbonIcon.classList.contains("is-recording")).toBe(false);
     expect(noticeMessages).toEqual(["Recording started", "Transcription started", "Transcription complete"]);
   });
@@ -615,7 +616,7 @@ describe("transcription progress notifications", () => {
       })
     );
     expect(waitForJob).toHaveBeenCalledWith("job-1", expect.any(Function));
-    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, "Recordings/Audio/meeting.wav", "meeting");
+    expect(createTranscriptNote).toHaveBeenCalledWith(completedJob, "Recordings/Audio/meeting.wav", "meeting.wav");
   });
 
   it("does not create a transcript when the audio attachment was not saved", async () => {
