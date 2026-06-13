@@ -20,5 +20,9 @@ describe("safeNoteFileName", () => {
   it("replaces characters Obsidian cannot use in a filename", () => {
     expect(safeNoteFileName("2026/06/02: team? sync")).toBe("2026-06-02- team- sync");
   });
+
+  it("sanitizes generated titles so they can be used as filenames", () => {
+    expect(safeNoteFileName("Team Sync: Q3 Roadmap?")).toBe("Team Sync- Q3 Roadmap-");
+  });
 });
 
