@@ -8,6 +8,7 @@ __pycache__/
 models/
 logs/
 temp/
+tmp/
 data/
 *.egg-info/
 .worktrees/

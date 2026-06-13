@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Local Transcription Console</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Local Transcription Console</h1>
+        <p id="statusLine">Checking gateway status...</p>
+      </div>
+      <button id="refreshAll" type="button">Refresh</button>
+    </header>
+
+    <main class="workspace">
+      <section class="panel status-panel">
+        <div class="section-head">
+          <h2>Runtime</h2>
+          <span id="backendState" class="badge">unknown</span>
+        </div>
+        <dl class="metric-grid">
+          <div><dt>Active tasks</dt><dd id="activeTasks">-</dd></div>
+          <div><dt>Queued jobs</dt><dd id="queuedJobs">-</dd></div>
+          <div><dt>Idle timeout</dt><dd id="idleTimeout">-</dd></div>
+          <div><dt>Voiceprints</dt><dd id="voiceprintState">-</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Transcribe</h2>
+          <span id="jobState" class="badge muted">idle</span>
+        </div>
+        <form id="transcriptionForm" class="form-grid">
+          <label>
+            Audio file
+            <input id="audioFile" name="file" type="file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg" required>
+          </label>
+          <label>
+            Language
+            <select id="language" name="language">
+              <option value="auto">auto</option>
+              <option value="zh">Chinese</option>
+              <option value="en">English</option>
+              <option value="ja">Japanese</option>
+              <option value="ko">Korean</option>
+            </select>
+          </label>
+          <label>
+            Model
+            <select id="model" name="model">
+              <option value="auto">auto</option>
+              <option value="qwen3-asr-0.6b">qwen3-asr-0.6b</option>
+              <option value="qwen3-asr-1.7b">qwen3-asr-1.7b</option>
+            </select>
+          </label>
+          <button type="submit">Start transcription</button>
+        </form>
+        <div class="result-actions">
+          <button id="copyText" type="button" disabled>Copy text</button>
+          <button id="downloadJson" type="button" disabled>Download JSON</button>
+        </div>
+        <pre id="transcriptOutput" class="output" aria-live="polite">No transcript yet.</pre>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Voiceprint Database</h2>
+          <div class="inline-actions">
+            <button id="loadSpeakers" type="button">Load speakers</button>
+            <span id="speakerCount" class="badge muted">-</span>
+          </div>
+        </div>
+        <div class="voiceprint-tools">
+          <form id="createSpeakerForm" class="stack">
+            <label>
+              Display name
+              <input id="speakerName" name="display_name" type="text" autocomplete="off" required>
+            </label>
+            <label>
+              Description
+              <input id="speakerDescription" name="description" type="text" autocomplete="off">
+            </label>
+            <label>
+              Enrollment audio
+              <input id="speakerFile" name="file" type="file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg" required>
+            </label>
+            <button type="submit">Create speaker</button>
+          </form>
+          <form id="addSampleForm" class="stack">
+            <label>
+              Speaker ID
+              <input id="sampleSpeakerId" name="speaker_id" type="text" autocomplete="off" required>
+            </label>
+            <label>
+              Additional sample
+              <input id="sampleFile" name="file" type="file" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg" required>
+            </label>
+            <button type="submit">Add sample</button>
+          </form>
+        </div>
+        <div id="speakerList" class="speaker-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>

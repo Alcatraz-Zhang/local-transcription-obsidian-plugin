@@ -131,7 +131,7 @@ function isTranscribableAudioFile(file: TAbstractFile): file is TFile {
 }
 
 class StatusModal extends Modal {
-  private statusEl: HTMLElement;
+  private statusEl: HTMLElement | null = null;
 
   constructor(app: App, private status: string) {
     super(app);
@@ -155,7 +155,7 @@ class StatusModal extends Modal {
 }
 
 export default class LocalTranscriptionPlugin extends Plugin {
-  pluginSettings: LocalTranscriptionSettings;
+  pluginSettings: LocalTranscriptionSettings = { ...DEFAULT_SETTINGS };
   private recorder: MediaRecorder | null = null;
   private chunks: Blob[] = [];
   private statusModal: StatusModal | null = null;
