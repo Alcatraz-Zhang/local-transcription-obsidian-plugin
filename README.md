@@ -1,67 +1,11 @@
 # Local Transcription
 
-Local-first meeting transcription for Obsidian. The project ships an Obsidian
-plugin plus a GPU ASR gateway container with Qwen3-ASR, CAM++ diarization,
-speaker timestamps, a built-in WebUI, and a persistent voiceprint database.
+Local-first meeting transcription for Obsidian.
 
-## Quick Start
-
-Requirements:
-
-- Docker Desktop or Docker Engine with NVIDIA Container Toolkit.
-- An NVIDIA GPU with a recent driver that can run CUDA 13 user-space images.
-- Obsidian for the plugin workflow.
-
-Run the gateway locally:
-
-```powershell
-copy .env.example .env
-docker compose up -d
-```
-
-Open the container WebUI:
-
-```text
-http://localhost:17003
-```
-
-Check health:
-
-```powershell
-curl.exe http://localhost:17003/health
-curl.exe http://localhost:17003/voiceprints/health
-```
-
-The default Compose mapping is `127.0.0.1:17003:17003`: the left side is the
-host port, and the right side is the container port. If you map
-`127.0.0.1:10001:17003`, open `http://localhost:10001`.
-
-## Published Images
-
-The ASR gateway image is versioned as `0.2.1`.
-
-```text
-ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:0.2.1
-ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:latest
-
-alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:0.2.1
-alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:latest
-```
-
-Run a published image directly:
-
-```powershell
-docker run --rm --gpus all --init `
-  -p 127.0.0.1:17003:17003 `
-  -v local-transcription-hf:/root/.cache/huggingface `
-  -v local-transcription-ms:/root/.cache/modelscope `
-  -v local-transcription-data:/data `
-  ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:0.2.1
-```
-
-The container serves both the transcription API and the WebUI from port `17003`.
-
-## Architecture
+This project pairs an Obsidian plugin with a Dockerized GPU ASR gateway. Record or
+upload audio in Obsidian, and the gateway transcribes it with speaker
+diarization, timestamps, and optional voiceprint matching — all running on your
+own hardware.
 
 ```text
 Obsidian plugin
@@ -73,51 +17,136 @@ Obsidian plugin
       -> idle timeout releases GPU memory
 ```
 
-The plugin owns recording/upload, transcript note rendering, speaker profile
-aliases, templates, and optional post-processing. The gateway owns job queueing,
-backend lifecycle, API normalization, WebUI delivery, and voiceprint API proxying.
+## Contents
 
-## Obsidian Plugin
+- [Quick Start](#quick-start)
+- [Install the Obsidian Plugin](#install-the-obsidian-plugin)
+- [Use the Gateway](#use-the-gateway)
+- [Features](#features)
+- [Gateway API](#gateway-api)
+- [Development](#development)
+- [Publishing Images](#publishing-images)
+- [Security Notes](#security-notes)
 
-Build output:
+## Quick Start
 
-```text
-apps/obsidian-plugin/main.js
+### Requirements
+
+- Docker Desktop or Docker Engine with the NVIDIA Container Toolkit.
+- An NVIDIA GPU with a driver that can run CUDA 13 user-space images.
+- Obsidian (desktop) for the plugin workflow.
+
+### Start the gateway
+
+```powershell
+copy .env.example .env
+docker compose up -d
 ```
 
-Development install files:
+The WebUI opens at `http://localhost:17003` (or the host port you mapped in
+`.env`).
 
-```text
-apps/obsidian-plugin/main.js
-apps/obsidian-plugin/manifest.json
-apps/obsidian-plugin/styles.css
+Check health:
+
+```powershell
+curl.exe http://localhost:17003/health
+curl.exe http://localhost:17003/voiceprints/health
 ```
 
-Default transcript note format:
+You can also run a pre-built image directly:
 
-```text
-[00:00:00 - 00:00:05] Speaker1: ...
-[00:00:06 - 00:00:12] Speaker2: ...
+```powershell
+docker run --rm --gpus all --init `
+  -p 127.0.0.1:17003:17003 `
+  -v local-transcription-hf:/root/.cache/huggingface `
+  -v local-transcription-ms:/root/.cache/modelscope `
+  -v local-transcription-data:/data `
+  ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:0.2.1
 ```
 
-The raw structured ASR response is preserved beside generated notes as
-`*.raw-asr.json`.
+## Install the Obsidian Plugin
+
+1. Build or download the plugin files:
+
+   ```text
+   apps/obsidian-plugin/main.js
+   apps/obsidian-plugin/manifest.json
+   apps/obsidian-plugin/styles.css
+   ```
+
+2. In Obsidian, open **Settings → Community plugins**, disable Safe mode, then
+   use **Open plugins folder** to create a folder named `local-transcription`.
+3. Copy the three files above into that folder.
+4. Enable **Local Transcription** in the Community plugins list.
+5. Open the plugin settings and confirm the gateway URL
+   (`http://localhost:17003` by default).
+
+To build from source:
+
+```powershell
+npm install
+npm run build
+```
+
+## Use the Gateway
+
+### WebUI
+
+Open `http://localhost:17003` to upload audio, watch job status, and manage
+enrolled speakers.
+
+### From Obsidian
+
+- **Record**: click the microphone ribbon icon or run **Start transcription
+  recording**, then **Stop and transcribe** when finished.
+- **Upload**: right-click any supported audio file and choose
+  **Transcribe audio file**.
+- Supported formats include `mp3`, `m4a`, `wav`, `flac`, `aac`, and `ogg`.
+
+### Transcript format
+
+Generated notes look like:
+
+```text
+[00:00:00 - 00:00:05] Alice: ...
+[00:00:06 - 00:00:12] Bob: ...
+```
+
+The raw structured ASR response is saved beside each note as `*.raw-asr.json`.
+
+### Voiceprints
+
+Voiceprint matching is enabled by default. Enroll speakers through the WebUI or
+the plugin's speaker commands. Confidence is handled as follows:
+
+- `>= 0.85`: the matched speaker profile is applied automatically.
+- `0.65` to `< 0.85`: shown as a suggestion for you to confirm.
+- `< 0.65`: keeps the temporary ASR speaker label.
+
+Persist the `/data` volume if you want enrolled speakers to survive container
+recreation.
+
+## Features
+
+- Local GPU inference via Qwen3-ASR and vLLM.
+- Speaker diarization with CAM++.
+- Persistent voiceprint matching (SQLite + sqlite-vec).
+- Built-in WebUI for uploads and speaker management.
+- OpenAI-compatible `/v1/audio/transcriptions` endpoint.
+- Optional LLM post-processing for transcript cleanup.
 
 ## Gateway API
 
-- `GET /`
+- `GET /` — WebUI
 - `GET /health`
-- `POST /jobs`
+- `POST /jobs` — recommended for long audio
 - `GET /jobs/{id}`
-- `POST /v1/audio/transcriptions`
+- `POST /v1/audio/transcriptions` — OpenAI-compatible
 - `GET /voiceprints/health`
 - `GET /voiceprints/speakers`
 - `POST /voiceprints/speakers`
 - `POST /voiceprints/speakers/{speaker_id}/samples`
 - `DELETE /voiceprints/speakers/{speaker_id}`
-
-`/jobs` is the recommended long-audio path. `/v1/audio/transcriptions` exists
-for OpenAI-compatible clients.
 
 Normalized responses include stable `segments` and `sentence_info` fields:
 
@@ -133,57 +162,32 @@ Normalized responses include stable `segments` and `sentence_info` fields:
 }
 ```
 
-## Voiceprints
-
-Voiceprint matching is enabled by default:
-
-```text
-VOICEPRINT_ENABLED=true
-VOICEPRINT_DB_PATH=/data/voiceprints.sqlite3
-VOICEPRINT_MATCH_THRESHOLD=0.70
-```
-
-The upstream Qwen3-ASR service owns the SQLite/sqlite-vec schema and embedding
-writes. The gateway reports database health and proxies registration/list/delete
-requests. Keep `/data` on a Docker volume if you want enrolled speakers to
-survive container recreation.
-
-Plugin-side confidence handling:
-
-- `>= 0.85`: auto-apply the matched speaker profile.
-- `0.65` to `< 0.85`: keep as a suggestion.
-- `< 0.65`: keep the temporary ASR speaker label.
-
-## Runtime Notes
-
-- First backend start can be slow while models download and vLLM warms up.
-- `IDLE_TIMEOUT` controls when the Qwen3-ASR child process exits to release VRAM.
-- Short WAV files below `MIN_DIARIZATION_DURATION_SECONDS` use a gateway
-  single-speaker fallback to avoid upstream short-audio diarization failures.
-- Model caches are persisted in Docker volumes:
-  `/root/.cache/huggingface` and `/root/.cache/modelscope`.
-
 ## Development
 
 ```powershell
+# Install dependencies
 npm install
+
+# Run all tests
 npm run test
+
+# Build the plugin
 npm run build
 ```
 
-Gateway tests:
+Gateway-only tests:
 
 ```powershell
 python -m pytest services/gateway/tests -q
 ```
 
-Plugin tests:
+Plugin-only tests:
 
 ```powershell
 npm run test:plugin
 ```
 
-Docker checks:
+Docker sanity checks:
 
 ```powershell
 docker compose config --quiet
@@ -191,46 +195,56 @@ docker compose build asr-gateway
 docker compose up -d asr-gateway
 ```
 
-## Dependency Pinning
+### Important runtime notes
 
-- The gateway starts from pinned
-  `nvidia/cuda:13.0.2-cudnn-devel-ubuntu24.04`.
-- Qwen3-ASR source is pinned to
-  `Quantatirsk/qwen3-asr@8723468eaafa98bc571c52a15ec6e3770a0d517e`.
-- Python constraints live in
-  `services/gateway/python-constraints-cu130.txt`.
-- Explicit runtime pins include `torch==2.11.0`, `torchaudio==2.11.0`,
-  `torchvision==0.26.0`, `vllm[audio]==0.22.1`, and `uv==0.11.21`.
-- Plugin dependencies are pinned through `package-lock.json`.
+- First start can be slow while models download and vLLM warms up.
+  `ASR_READY_TIMEOUT` defaults to 30 minutes.
+- `IDLE_TIMEOUT` (default 300s) stops the Qwen3-ASR child process to release
+  VRAM.
+- Audio shorter than `MIN_DIARIZATION_DURATION_SECONDS` (default 5s) uses a
+  single-speaker fallback to avoid upstream diarization failures.
+- Model caches are persisted in named volumes:
+  `/root/.cache/huggingface` and `/root/.cache/modelscope`.
 
-Do not move dependency versions casually. Upgrade CUDA, PyTorch, vLLM,
-constraints, and transcript samples as one tested change.
+### Dependency pinning
 
-## Production Test Evidence
+The gateway stack is tightly coupled. Upgrade CUDA, PyTorch, vLLM, constraints,
+and transcript samples as **one tested change**:
 
-The current release candidate was tested with:
+- Base image: `nvidia/cuda:13.0.2-cudnn-devel-ubuntu24.04`
+- PyTorch CUDA index: `cu130`
+- `torch==2.11.0`, `torchaudio==2.11.0`, `torchvision==0.26.0`
+- `vllm[audio]==0.22.1`
+- `uv==0.11.21`
+- Qwen3-ASR source pinned to commit
+  `8723468eaafa98bc571c52a15ec6e3770a0d517e`
+- Python constraints: `services/gateway/python-constraints-cu130.txt`
 
-- LibriSpeech short English WAV.
-- Chinese speech MP3.
-- A real 324 second meeting M4A.
-- AMI ES2002a first 10 minutes.
-- AMI ES2002a full mixed-headset WAV.
-- A 1291 second stereo War and Peace MP3.
+## Publishing Images
 
-Voiceprint validation covered registration, SQLite persistence across container
-restart, cleanup, and a positive match where a registered Chinese sample was
-recognized as `ProdTest_Chinese`.
+A GitHub Action builds and pushes the gateway image to both GitHub Container
+Registry (GHCR) and Docker Hub on every push to `main` and on version tags.
 
-Test artifacts are generated under `tmp/` and are intentionally ignored by Git.
+Published images:
 
-## Publishing
+```text
+ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:0.2.1
+ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:latest
 
-Build and tag the gateway:
+alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:0.2.1
+alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:latest
+```
+
+### Manual publish (fallback)
+
+Build and tag locally:
 
 ```powershell
 docker build -t local-transcription:0.2.1 ./services/gateway
+
 docker tag local-transcription:0.2.1 ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:0.2.1
 docker tag local-transcription:0.2.1 ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:latest
+
 docker tag local-transcription:0.2.1 alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:0.2.1
 docker tag local-transcription:0.2.1 alcatraz9527/local-transcription-obsidian-plugin-asr-gateway:latest
 ```
@@ -243,7 +257,7 @@ docker push ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gatew
 docker push ghcr.io/alcatraz-zhang/local-transcription-obsidian-plugin-asr-gateway:latest
 ```
 
-Publish to Docker Hub after logging in with an account that owns the namespace:
+Publish to Docker Hub:
 
 ```powershell
 docker login
@@ -256,7 +270,7 @@ can associate the package with this repository.
 
 ## Security Notes
 
-- API keys for post-processing are stored through Obsidian `secretStorage`.
-- `.env`, model caches, logs, generated data, and production test artifacts are
-  not committed.
+- Post-processing API keys are stored through Obsidian `secretStorage`.
+- `.env`, model caches, logs, generated data, and test artifacts are not
+  committed.
 - The gateway binds to localhost by default in Compose.
