@@ -11,7 +11,7 @@ ARG TORCHVISION_VERSION=0.26.0
 ARG VLLM_PACKAGE=vllm[audio]==0.22.1
 ARG UV_VERSION=0.11.21
 ARG TORCH_CUDA_ARCH_LIST=12.0+PTX
-ARG IMAGE_VERSION=0.2.1
+ARG IMAGE_VERSION=0.2.2
 
 LABEL org.opencontainers.image.title="Local Transcription ASR Gateway" \
     org.opencontainers.image.description="Dockerized Qwen3-ASR gateway for the Local Transcription Obsidian plugin" \

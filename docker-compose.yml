@@ -4,7 +4,7 @@ services:
   asr-gateway:
     build:
       context: ./services/gateway
-    image: local-transcription:0.2.1
+    image: local-transcription:0.2.2
     init: true
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-17003}:17003"

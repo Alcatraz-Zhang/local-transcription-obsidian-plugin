@@ -31,6 +31,7 @@ var GatewayClient = class {
   constructor(gatewayUrl) {
     this.gatewayUrl = gatewayUrl;
   }
+  gatewayUrl;
   baseUrl() {
     return this.gatewayUrl.replace(/\/+$/, "");
   }
@@ -135,6 +136,13 @@ var DEFAULT_POST_PROCESSING_PROMPT = [
   "\u8F93\u51FA\uFF1A",
   "\u76F4\u63A5\u8F93\u51FA\u6574\u7406\u540E\u7684\u8F6C\u5F55\u7A3F\u3002"
 ].join("\n");
+var DEFAULT_TITLE_GENERATION_PROMPT = [
+  "\u8BF7\u6839\u636E\u4EE5\u4E0B\u8F6C\u5F55\u7A3F\u751F\u6210\u4E00\u4E2A\u7B80\u6D01\u3001\u51C6\u786E\u7684\u7B14\u8BB0\u6807\u9898\uFF0C\u76F4\u63A5\u8868\u8FBE\u5185\u5BB9\u4E3B\u9898\u3002",
+  "\u8981\u6C42\uFF1A",
+  "1. \u6807\u9898\u957F\u5EA6\u63A7\u5236\u5728 30 \u4E2A\u6C49\u5B57\u6216 60 \u4E2A\u5B57\u7B26\u4EE5\u5185\u3002",
+  "2. \u4E0D\u8981\u5305\u542B\u65F6\u95F4\u6233\u3001\u8BF4\u8BDD\u4EBA\u6807\u7B7E\u6216\u65E0\u5173\u4FEE\u9970\u3002",
+  "3. \u4E0D\u8981\u8FD4\u56DE\u89E3\u91CA\u3001\u5F15\u53F7\u6216 Markdown \u683C\u5F0F\uFF0C\u53EA\u8FD4\u56DE\u6807\u9898\u6587\u672C\u672C\u8EAB\u3002"
+].join("\n");
 var DEFAULT_SETTINGS = {
   gatewayUrl: "http://localhost:17003",
   audioSavePath: "Recordings/Audio",
@@ -147,6 +155,8 @@ var DEFAULT_SETTINGS = {
   outputMode: "speaker_timestamp",
   language: "auto",
   asrModel: "auto",
+  titleGenerationEnabled: false,
+  titleGenerationPrompt: DEFAULT_TITLE_GENERATION_PROMPT,
   postProcessingEnabled: false,
   postProcessingUrl: "https://api.openai.com/v1/chat/completions",
   postProcessingModel: "",
@@ -445,6 +455,39 @@ async function postProcessTranscript(options) {
   return content.trim();
 }
 
+// src/titleGeneration.ts
+function buildTitleGenerationPrompt(userPrompt) {
+  return [
+    userPrompt.trim(),
+    "\u53EA\u8FD4\u56DE\u6807\u9898\u6587\u672C\u672C\u8EAB\uFF0C\u4E0D\u8981\u8FD4\u56DE\u89E3\u91CA\u3001\u5F15\u53F7\u3001Markdown \u6216\u4EFB\u4F55\u989D\u5916\u5185\u5BB9\u3002"
+  ].filter(Boolean).join("\n\n");
+}
+async function generateTitle(options) {
+  const response = await options.request(options.endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${options.apiKey}`
+    },
+    body: JSON.stringify({
+      model: options.model,
+      messages: [
+        { role: "system", content: buildTitleGenerationPrompt(options.prompt) },
+        { role: "user", content: options.transcript }
+      ]
+    })
+  });
+  if (!response.ok) {
+    throw new Error(`Title generation failed with HTTP ${response.status}`);
+  }
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content !== "string" || !content.trim()) {
+    throw new Error("Title generation response did not include message content");
+  }
+  return content.trim();
+}
+
 // src/speakerStore.ts
 var SPEAKER_PROFILE_PATH = ".local-transcription/speakers.json";
 function isNonblankString(value) {
@@ -665,6 +708,8 @@ var SpeakerStore = class {
     this.adapter = adapter;
     this.path = path;
   }
+  adapter;
+  path;
   /**
    * Sanitized convenience load for read-only display paths. Write flows should
    * use loadEditable() so partial or invalid storage cannot be silently replaced.
@@ -817,6 +862,7 @@ var ObsidianVaultAdapter = class {
   constructor(app) {
     this.app = app;
   }
+  app;
   async read(path) {
     const file = this.app.vault.getAbstractFileByPath((0, import_obsidian.normalizePath)(path));
     if (!(file instanceof import_obsidian.TFile)) {
@@ -897,6 +943,7 @@ var StatusModal = class extends import_obsidian.Modal {
     super(app);
     this.status = status;
   }
+  status;
   statusEl = null;
   onOpen() {
     this.contentEl.empty();
@@ -1108,7 +1155,6 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
   }
   async transcribeBlob(blob, sourceName) {
     new import_obsidian.Notice("Transcription started");
-    const title = defaultTitleFromFile(sourceName);
     const audioPath = await this.saveAudio(blob, sourceName);
     const initialJob = await this.client().submitJob({
       blob,
@@ -1121,7 +1167,7 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     if (job.status !== "completed" || !job.result) {
       throw new Error(job.error || "Transcription failed");
     }
-    await this.createTranscriptNote(job, audioPath, title);
+    await this.createTranscriptNote(job, audioPath, sourceName);
     new import_obsidian.Notice("Transcription complete");
   }
   async saveAudio(blob, sourceName) {
@@ -1134,7 +1180,7 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
     }
     return audioPath;
   }
-  async createTranscriptNote(job, audioPath, title) {
+  async createTranscriptNote(job, audioPath, sourceName) {
     await this.ensureFolder(this.pluginSettings.transcriptSavePath);
     const result = job.result ?? {};
     const normalizedSegments = normalizeSegments(result);
@@ -1159,6 +1205,28 @@ var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
         request: fetch
       });
       finalText = mergeProcessedTranscript(processed, rawText, this.pluginSettings.keepOriginalTranscription);
+    }
+    let title = defaultTitleFromFile(sourceName);
+    if (this.pluginSettings.titleGenerationEnabled) {
+      const apiKey = await this.getPostProcessingApiKey();
+      if (!apiKey) {
+        throw new Error("Post-processing API key is not configured");
+      }
+      try {
+        const generated = await generateTitle({
+          endpoint: this.pluginSettings.postProcessingUrl,
+          apiKey,
+          model: this.pluginSettings.postProcessingModel,
+          prompt: this.pluginSettings.titleGenerationPrompt,
+          transcript: finalText,
+          request: fetch
+        });
+        title = safeNoteFileName(generated);
+      } catch (error) {
+        new import_obsidian.Notice(
+          `Title generation failed: ${error instanceof Error ? error.message : String(error)}. Using filename as title.`
+        );
+      }
     }
     const now = /* @__PURE__ */ new Date();
     const date = now.toISOString().slice(0, 10);
@@ -1208,6 +1276,7 @@ var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTa
     super(app, plugin);
     this.plugin = plugin;
   }
+  plugin;
   display() {
     const { containerEl } = this;
     containerEl.empty();
@@ -1293,6 +1362,23 @@ var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTa
           await this.plugin.saveSettings();
         })
       );
+    }
+    new import_obsidian.Setting(containerEl).setName("Auto-generate title").setDesc("Generate the note title from the transcript using the post-processing LLM.").addToggle(
+      (toggle) => toggle.setValue(this.plugin.pluginSettings.titleGenerationEnabled).onChange(async (value) => {
+        this.plugin.pluginSettings.titleGenerationEnabled = value;
+        await this.plugin.saveSettings();
+        this.display();
+      })
+    );
+    if (this.plugin.pluginSettings.titleGenerationEnabled) {
+      new import_obsidian.Setting(containerEl).setName("Title generation prompt").addTextArea((text) => {
+        text.inputEl.rows = 10;
+        text.inputEl.addClass("local-transcription-title-generation-prompt");
+        text.setValue(this.plugin.pluginSettings.titleGenerationPrompt).onChange(async (value) => {
+          this.plugin.pluginSettings.titleGenerationPrompt = value;
+          await this.plugin.saveSettings();
+        });
+      });
     }
   }
 };
