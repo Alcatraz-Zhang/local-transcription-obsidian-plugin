@@ -10,7 +10,8 @@ from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from .backend import QwenBackend
 from .formatter import normalize_response
@@ -35,6 +36,30 @@ def _unique_path(directory: Path, filename: str) -> Path:
     raise RuntimeError(f"Could not find a free filename for {filename}")
 
 
+def _service_document() -> dict[str, Any]:
+    return {
+        "service": "local-transcription",
+        "status": "ok",
+        "endpoints": {
+            "health": "/health",
+            "jobs": "/jobs",
+            "openai_transcriptions": "/v1/audio/transcriptions",
+            "voiceprints": "/voiceprints",
+            "webui": "/",
+        },
+    }
+
+
+def _mount_webui(app: FastAPI, webui_dir: Path) -> None:
+    async def webui_index() -> FileResponse:
+        return FileResponse(webui_dir / "index.html")
+
+    app.get("/", include_in_schema=False)(webui_index)
+    app.get("/ui", include_in_schema=False)(webui_index)
+    app.mount("/assets", StaticFiles(directory=webui_dir / "assets"), name="webui-root-assets")
+    app.mount("/ui/assets", StaticFiles(directory=webui_dir / "assets"), name="webui-assets")
+
+
 def create_app(
     *,
     backend: Any | None = None,
@@ -45,6 +70,7 @@ def create_app(
 ) -> FastAPI:
     root = storage_root or Path("/data")
     audio_dir = root / "audio"
+    webui_dir = Path(__file__).with_name("webui")
     backend = backend or QwenBackend()
     jobs: dict[str, dict[str, Any]] = {}
     stop_idle_monitor = threading.Event()
@@ -82,6 +108,15 @@ def create_app(
         allow_headers=["*"],
     )
     app.include_router(create_voiceprint_router(backend))
+    _mount_webui(app, webui_dir)
+
+    @app.get("/api")
+    async def service_document() -> dict[str, Any]:
+        return _service_document()
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> Response:
+        return Response(status_code=204)
 
     def process_job(job_id: str) -> None:
         job = jobs[job_id]

@@ -2,22 +2,18 @@ from __future__ import annotations
 
 import mimetypes
 import os
+import signal
 import time
+import wave
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import httpx
 
-from .formatter import normalize_response
+from .env import env_bool, env_float
+from .formatter import apply_default_speaker, normalize_response
 from .lifecycle import BackendLifecycle
-
-
-def _env_bool(name: str, default: bool) -> bool:
-    raw = os.getenv(name)
-    if raw is None:
-        return default
-    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
 @dataclass(frozen=True)
@@ -28,16 +24,18 @@ class BackendConfig:
     enable_timestamps: bool = True
     idle_timeout: int = 300
     ready_timeout: int = 1800
+    min_diarization_duration_seconds: float = 5.0
 
     @classmethod
     def from_env(cls) -> "BackendConfig":
         return cls(
             asr_model=(os.getenv("ASR_MODEL") or "auto").strip() or "auto",
             language=(os.getenv("LANGUAGE") or "auto").strip() or "auto",
-            enable_diarization=_env_bool("ENABLE_DIARIZATION", True),
-            enable_timestamps=_env_bool("ENABLE_TIMESTAMPS", True),
+            enable_diarization=env_bool("ENABLE_DIARIZATION", True),
+            enable_timestamps=env_bool("ENABLE_TIMESTAMPS", True),
             idle_timeout=int(os.getenv("IDLE_TIMEOUT", "300")),
             ready_timeout=int(os.getenv("ASR_READY_TIMEOUT", "1800")),
+            min_diarization_duration_seconds=env_float("MIN_DIARIZATION_DURATION_SECONDS", 5.0, min_value=0),
         )
 
     def transcription_form(self, *, language: str | None = None, model: str | None = None) -> dict[str, str]:
@@ -73,6 +71,7 @@ class QwenBackend:
             command=command or ["/opt/venv/bin/python", "-m", "gateway_app.qwen_child"],
             ready_check=self._wait_for_ready,
             idle_timeout=self.config.idle_timeout,
+            managed_shutdown_signal=getattr(signal, "SIGUSR1", None),
         )
 
     def _wait_for_ready(self) -> bool:
@@ -82,7 +81,7 @@ class QwenBackend:
                 returncode = self.lifecycle.process_returncode
                 if returncode is not None:
                     raise RuntimeError(f"ASR backend exited before becoming ready (exit code {returncode})")
-                for path in ("/health", "/v1/models", "/stream/v1/asr/health"):
+                for path in ("/v1/models", "/stream/v1/asr/health"):
                     try:
                         if client.get(f"{self.backend_url}{path}").status_code == 200:
                             return True
@@ -99,6 +98,24 @@ class QwenBackend:
         with httpx.Client(timeout=3600) as client:
             return client.request(method, f"{self.backend_url}{path}", **kwargs)
 
+    def _wav_duration_seconds(self, audio_path: Path) -> float | None:
+        if audio_path.suffix.lower() != ".wav":
+            return None
+        try:
+            with wave.open(str(audio_path), "rb") as handle:
+                frame_rate = handle.getframerate()
+                if frame_rate <= 0:
+                    return None
+                return handle.getnframes() / float(frame_rate)
+        except (EOFError, OSError, wave.Error):
+            return None
+
+    def _should_skip_diarization(self, audio_path: Path) -> bool:
+        if not self.config.enable_diarization:
+            return False
+        duration = self._wav_duration_seconds(audio_path)
+        return duration is not None and duration < self.config.min_diarization_duration_seconds
+
     def transcribe(
         self,
         audio_path: Path,
@@ -111,6 +128,9 @@ class QwenBackend:
         try:
             self.lifecycle.ensure_ready()
             data = self.config.transcription_form(language=language, model=model)
+            skip_diarization = self._should_skip_diarization(audio_path)
+            if skip_diarization:
+                data["enable_speaker_diarization"] = "false"
             content_type = mimetypes.guess_type(audio_path.name)[0] or "application/octet-stream"
             with audio_path.open("rb") as handle:
                 with httpx.Client(timeout=3600) as client:
@@ -120,7 +140,9 @@ class QwenBackend:
                         files={"file": (audio_path.name, handle, content_type)},
                     )
             response.raise_for_status()
-            result = response.json()
-            return normalize_response(result)
+            result = normalize_response(response.json())
+            if skip_diarization and isinstance(result, dict):
+                apply_default_speaker(result, "Speaker1")
+            return result
         finally:
             self.lifecycle.mark_activity_finished()

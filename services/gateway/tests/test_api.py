@@ -99,6 +99,55 @@ def test_health_reports_runtime_configuration(tmp_path):
     assert response.json()["idle_timeout_seconds"] == 123
 
 
+def test_api_returns_service_document(tmp_path):
+    backend = FakeBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True, idle_timeout=123)
+    client = TestClient(app)
+
+    response = client.get("/api")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "service": "local-transcription",
+        "status": "ok",
+        "endpoints": {
+            "health": "/health",
+            "jobs": "/jobs",
+            "openai_transcriptions": "/v1/audio/transcriptions",
+            "voiceprints": "/voiceprints",
+            "webui": "/",
+        },
+    }
+
+
+def test_webui_serves_index_and_assets(tmp_path):
+    backend = FakeBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
+    client = TestClient(app)
+
+    index_response = client.get("/")
+    alias_response = client.get("/ui")
+    script_response = client.get("/assets/app.js")
+
+    assert index_response.status_code == 200
+    assert "Local Transcription Console" in index_response.text
+    assert alias_response.status_code == 200
+    assert "Local Transcription Console" in alias_response.text
+    assert script_response.status_code == 200
+    assert "submitTranscription" in script_response.text
+
+
+def test_favicon_returns_no_content(tmp_path):
+    backend = FakeBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
+    client = TestClient(app)
+
+    response = client.get("/favicon.ico")
+
+    assert response.status_code == 204
+    assert response.content == b""
+
+
 def test_health_triggers_idle_backend_stop(tmp_path):
     backend = FakeLifecycleBackend()
     app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True, idle_timeout=123)

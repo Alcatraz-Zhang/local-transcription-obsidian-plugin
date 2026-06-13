@@ -31,6 +31,7 @@ var GatewayClient = class {
   constructor(gatewayUrl) {
     this.gatewayUrl = gatewayUrl;
   }
+  gatewayUrl;
   baseUrl() {
     return this.gatewayUrl.replace(/\/+$/, "");
   }
@@ -665,6 +666,8 @@ var SpeakerStore = class {
     this.adapter = adapter;
     this.path = path;
   }
+  adapter;
+  path;
   /**
    * Sanitized convenience load for read-only display paths. Write flows should
    * use loadEditable() so partial or invalid storage cannot be silently replaced.
@@ -817,6 +820,7 @@ var ObsidianVaultAdapter = class {
   constructor(app) {
     this.app = app;
   }
+  app;
   async read(path) {
     const file = this.app.vault.getAbstractFileByPath((0, import_obsidian.normalizePath)(path));
     if (!(file instanceof import_obsidian.TFile)) {
@@ -897,7 +901,8 @@ var StatusModal = class extends import_obsidian.Modal {
     super(app);
     this.status = status;
   }
-  statusEl;
+  status;
+  statusEl = null;
   onOpen() {
     this.contentEl.empty();
     this.contentEl.createEl("h2", { text: "Local Transcription" });
@@ -914,7 +919,7 @@ var StatusModal = class extends import_obsidian.Modal {
   }
 };
 var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
-  pluginSettings;
+  pluginSettings = { ...DEFAULT_SETTINGS };
   recorder = null;
   chunks = [];
   statusModal = null;
@@ -1208,6 +1213,7 @@ var LocalTranscriptionSettingTab = class extends import_obsidian.PluginSettingTa
     super(app, plugin);
     this.plugin = plugin;
   }
+  plugin;
   display() {
     const { containerEl } = this;
     containerEl.empty();
