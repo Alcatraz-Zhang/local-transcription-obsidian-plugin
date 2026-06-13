@@ -1,3 +1,5 @@
+import sqlite3
+
 import httpx
 from fastapi.testclient import TestClient
 
@@ -93,6 +95,7 @@ def test_voiceprint_delete_speaker_forwards_to_upstream(tmp_path):
 def test_voiceprint_health_reports_configuration_without_starting_backend(tmp_path, monkeypatch):
     monkeypatch.setenv("VOICEPRINT_ENABLED", "true")
     monkeypatch.setenv("VOICEPRINT_DB_PATH", "/data/voiceprints.sqlite3")
+    monkeypatch.setenv("VOICEPRINT_MATCH_THRESHOLD", "0.72")
     backend = FakeVoiceprintBackend()
     app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
     client = TestClient(app)
@@ -103,8 +106,45 @@ def test_voiceprint_health_reports_configuration_without_starting_backend(tmp_pa
     assert response.json() == {
         "enabled": True,
         "db_path": "/data/voiceprints.sqlite3",
+        "db_exists": False,
+        "db_size_bytes": 0,
+        "match_threshold": 0.72,
         "speaker_count": None,
     }
+    assert backend.ready_calls == 0
+
+
+def test_voiceprint_health_counts_existing_sqlite_speakers_without_starting_backend(tmp_path, monkeypatch):
+    db_path = tmp_path / "voiceprints.sqlite3"
+    with sqlite3.connect(db_path) as connection:
+        connection.execute(
+            "create table voiceprint_speakers (speaker_id text primary key, display_name text, status text, deleted_at text)"
+        )
+        connection.execute(
+            "insert into voiceprint_speakers (speaker_id, display_name, status, deleted_at) values (?, ?, ?, ?)",
+            ("vp_alice", "Alice", "active", None),
+        )
+        connection.execute(
+            "insert into voiceprint_speakers (speaker_id, display_name, status, deleted_at) values (?, ?, ?, ?)",
+            ("vp_deleted", "Deleted", "active", "2026-06-12T00:00:00Z"),
+        )
+        connection.execute(
+            "insert into voiceprint_speakers (speaker_id, display_name, status, deleted_at) values (?, ?, ?, ?)",
+            ("vp_status_deleted", "Status Deleted", "deleted", None),
+        )
+
+    monkeypatch.setenv("VOICEPRINT_ENABLED", "true")
+    monkeypatch.setenv("VOICEPRINT_DB_PATH", str(db_path))
+    backend = FakeVoiceprintBackend()
+    app = create_app(backend=backend, storage_root=tmp_path, run_jobs_inline=True)
+    client = TestClient(app)
+
+    response = client.get("/voiceprints/health")
+
+    assert response.status_code == 200
+    assert response.json()["db_exists"] is True
+    assert response.json()["db_size_bytes"] > 0
+    assert response.json()["speaker_count"] == 1
     assert backend.ready_calls == 0
 
 
@@ -133,3 +173,18 @@ def test_voiceprint_upstream_failure_returns_502(tmp_path):
 
     assert response.status_code == 502
     assert "upstream failed" in response.json()["message"]
+
+
+def test_voiceprint_backend_start_failure_returns_502(tmp_path):
+    class FailingBackend(FakeVoiceprintBackend):
+        def upstream_request(self, method, path, **kwargs):
+            raise RuntimeError("ASR backend exited before becoming ready (exit code 3)")
+
+    app = create_app(backend=FailingBackend(), storage_root=tmp_path, run_jobs_inline=True)
+    client = TestClient(app)
+
+    response = client.get("/voiceprints/speakers")
+
+    assert response.status_code == 502
+    assert "backend is unavailable" in response.json()["message"]
+    assert "exit code 3" in response.json()["message"]

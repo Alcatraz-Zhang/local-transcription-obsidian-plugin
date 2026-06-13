@@ -1,5 +1,7 @@
 from pathlib import Path
 import json
+import types
+import weakref
 
 import pytest
 
@@ -152,3 +154,257 @@ def test_set_models_config_path_updates_backing_setting(tmp_path):
     qwen_child._set_models_config_path(settings, patched_config)
 
     assert settings.models_config_path == str(patched_config)
+
+
+def test_runtime_defaults_enable_spawn_xet_and_voiceprints(monkeypatch, tmp_path):
+    db_path = tmp_path / "voiceprints" / "voiceprints.sqlite3"
+    for name in (
+        "VLLM_WORKER_MULTIPROC_METHOD",
+        "HF_HUB_DISABLE_XET",
+        "VOICEPRINT_ENABLED",
+        "VOICEPRINT_MATCH_THRESHOLD",
+        "LOCAL_TRANSCRIPTION_PATCH_VLLM_SHUTDOWN",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("VOICEPRINT_DB_PATH", str(db_path))
+
+    qwen_child._apply_runtime_defaults()
+
+    assert qwen_child.os.environ["VLLM_WORKER_MULTIPROC_METHOD"] == "spawn"
+    assert qwen_child.os.environ["HF_HUB_DISABLE_XET"] == "1"
+    assert qwen_child.os.environ["VOICEPRINT_ENABLED"] == "true"
+    assert qwen_child.os.environ["VOICEPRINT_DB_PATH"] == str(db_path)
+    assert qwen_child.os.environ["VOICEPRINT_MATCH_THRESHOLD"] == "0.70"
+    assert qwen_child.os.environ["LOCAL_TRANSCRIPTION_PATCH_VLLM_SHUTDOWN"] == "1"
+    assert db_path.parent.exists()
+
+
+def test_runtime_defaults_do_not_override_explicit_values(monkeypatch, tmp_path):
+    db_path = tmp_path / "custom.sqlite3"
+    monkeypatch.setenv("VLLM_WORKER_MULTIPROC_METHOD", "forkserver")
+    monkeypatch.setenv("HF_HUB_DISABLE_XET", "0")
+    monkeypatch.setenv("VOICEPRINT_ENABLED", "false")
+    monkeypatch.setenv("VOICEPRINT_DB_PATH", str(db_path))
+    monkeypatch.setenv("VOICEPRINT_MATCH_THRESHOLD", "0.82")
+    monkeypatch.setenv("LOCAL_TRANSCRIPTION_PATCH_VLLM_SHUTDOWN", "0")
+
+    qwen_child._apply_runtime_defaults()
+
+    assert qwen_child.os.environ["VLLM_WORKER_MULTIPROC_METHOD"] == "forkserver"
+    assert qwen_child.os.environ["HF_HUB_DISABLE_XET"] == "0"
+    assert qwen_child.os.environ["VOICEPRINT_ENABLED"] == "false"
+    assert qwen_child.os.environ["VOICEPRINT_DB_PATH"] == str(db_path)
+    assert qwen_child.os.environ["VOICEPRINT_MATCH_THRESHOLD"] == "0.82"
+    assert qwen_child.os.environ["LOCAL_TRANSCRIPTION_PATCH_VLLM_SHUTDOWN"] == "0"
+
+
+def test_patch_auto_model_disable_update_sets_default_without_overriding_explicit_value():
+    calls = []
+
+    class FakeAutoModel:
+        def __init__(self, **kwargs):
+            calls.append(kwargs)
+
+    assert qwen_child._patch_auto_model_disable_update(FakeAutoModel) is True
+    FakeAutoModel(model="a")
+    FakeAutoModel(model="b", disable_update=False)
+
+    assert calls == [
+        {"model": "a", "disable_update": True},
+        {"model": "b", "disable_update": False},
+    ]
+
+
+def test_patch_auto_model_disable_update_is_idempotent():
+    calls = []
+
+    class FakeAutoModel:
+        def __init__(self, **kwargs):
+            calls.append(kwargs)
+
+    assert qwen_child._patch_auto_model_disable_update(FakeAutoModel) is True
+    assert qwen_child._patch_auto_model_disable_update(FakeAutoModel) is False
+    FakeAutoModel(model="a")
+
+    assert calls == [{"model": "a", "disable_update": True}]
+
+
+def test_patch_vllm_engine_shutdown_cleanup_wraps_shutdown_once():
+    calls = []
+
+    class FakeEngineCore:
+        def shutdown(self):
+            calls.append("shutdown")
+
+    assert qwen_child._patch_vllm_engine_shutdown_cleanup(FakeEngineCore, lambda: calls.append("cleanup")) is True
+    assert qwen_child._patch_vllm_engine_shutdown_cleanup(FakeEngineCore, lambda: calls.append("cleanup2")) is False
+
+    FakeEngineCore().shutdown()
+
+    assert calls == ["shutdown", "cleanup"]
+
+
+def test_shutdown_runtime_vllm_engines_calls_nested_llm_engines():
+    calls = []
+
+    class FakeLLMEngine:
+        def shutdown(self):
+            calls.append("llm_engine.shutdown")
+
+    class FakeLLM:
+        llm_engine = FakeLLMEngine()
+
+    class FakeBackend:
+        _llm = FakeLLM()
+        _forced_aligner = None
+
+    class FakeQwenEngine:
+        model = FakeBackend()
+
+    class FakeRouter:
+        _shared_engines = {("qwen_vllm", "qwen3-asr-0.6b"): FakeQwenEngine()}
+
+    qwen_child._shutdown_runtime_vllm_engines(FakeRouter())
+
+    assert calls == ["llm_engine.shutdown"]
+
+
+def test_patch_vllm_core_client_treats_zero_exitcode_as_expected_shutdown():
+    calls = []
+
+    class FakeLogger:
+        def info(self, *args):
+            calls.append(("info", args))
+
+        def error(self, *args):
+            calls.append(("error", args))
+
+    class FakeThread:
+        def __init__(self, target, **kwargs):
+            self.target = target
+
+        def start(self):
+            self.target()
+
+    class FakeProc:
+        sentinel = "sentinel"
+        name = "EngineCore"
+        exitcode = 0
+
+        def join(self, timeout=None):
+            calls.append(("join", timeout))
+
+    class FakeFinalizer:
+        alive = True
+
+    class FakeResources:
+        engine_dead = False
+        engine_manager = types.SimpleNamespace(processes=[FakeProc()])
+
+    class FakeMPClient:
+        def __init__(self):
+            self.resources = FakeResources()
+            self._finalizer = FakeFinalizer()
+
+        def shutdown(self):
+            calls.append(("shutdown",))
+
+    fake_module = types.SimpleNamespace(
+        Thread=FakeThread,
+        logger=FakeLogger(),
+        weakref=weakref,
+        multiprocessing=types.SimpleNamespace(
+            connection=types.SimpleNamespace(wait=lambda sentinels: ["sentinel"])
+        ),
+    )
+
+    assert qwen_child._patch_vllm_core_client_expected_exit(FakeMPClient, fake_module) is True
+    FakeMPClient().start_engine_core_monitor()
+
+    assert ("join", 0) in calls
+    assert ("shutdown",) in calls
+    assert not any(call[0] == "error" for call in calls)
+
+
+def test_patch_vllm_core_client_uses_injected_wait_when_module_lacks_multiprocessing():
+    calls = []
+
+    class FakeLogger:
+        def info(self, *args):
+            calls.append(("info", args))
+
+        def error(self, *args):
+            calls.append(("error", args))
+
+    class FakeThread:
+        def __init__(self, target, **kwargs):
+            self.target = target
+
+        def start(self):
+            self.target()
+
+    class FakeProc:
+        sentinel = "sentinel"
+        name = "EngineCore"
+        exitcode = 0
+
+        def join(self, timeout=None):
+            calls.append(("join", timeout))
+
+    class FakeFinalizer:
+        alive = True
+
+    class FakeResources:
+        engine_dead = False
+        engine_manager = types.SimpleNamespace(processes=[FakeProc()])
+
+    class FakeMPClient:
+        def __init__(self):
+            self.resources = FakeResources()
+            self._finalizer = FakeFinalizer()
+
+        def shutdown(self):
+            calls.append(("shutdown",))
+
+    fake_module = types.SimpleNamespace(
+        Thread=FakeThread,
+        logger=FakeLogger(),
+        weakref=weakref,
+    )
+
+    assert (
+        qwen_child._patch_vllm_core_client_expected_exit(
+            FakeMPClient,
+            fake_module,
+            connection_wait=lambda sentinels: ["sentinel"],
+        )
+        is True
+    )
+    FakeMPClient().start_engine_core_monitor()
+
+    assert ("join", 0) in calls
+    assert ("shutdown",) in calls
+    assert not any(call[0] == "error" for call in calls)
+
+
+def test_expected_vllm_engine_exit_accepts_managed_shutdown_signals():
+    class FakeProcess:
+        def __init__(self, exitcode):
+            self.exitcode = exitcode
+
+    assert qwen_child._expected_vllm_engine_exit(FakeProcess(0)) is True
+    assert qwen_child._expected_vllm_engine_exit(FakeProcess(-qwen_child.signal.SIGINT)) is True
+    assert qwen_child._expected_vllm_engine_exit(FakeProcess(-qwen_child.signal.SIGTERM)) is True
+    assert qwen_child._expected_vllm_engine_exit(FakeProcess(1)) is False
+
+
+def test_expected_vllm_engine_exit_accepts_any_exit_after_managed_shutdown():
+    class FakeProcess:
+        exitcode = 1
+
+    previous = qwen_child._MANAGED_SHUTDOWN_REQUESTED
+    try:
+        qwen_child._MANAGED_SHUTDOWN_REQUESTED = True
+        assert qwen_child._expected_vllm_engine_exit(FakeProcess()) is True
+    finally:
+        qwen_child._MANAGED_SHUTDOWN_REQUESTED = previous

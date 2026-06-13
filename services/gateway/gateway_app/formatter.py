@@ -148,3 +148,15 @@ def normalize_response(value: Any) -> Any:
     if isinstance(normalized.get("result"), str):
         normalized["result"] = clean_asr_text(normalized["result"])
     return normalized
+
+
+def apply_default_speaker(payload: dict[str, Any], speaker: str) -> None:
+    seen_segments: set[int] = set()
+    for key in ("segments", "sentence_info"):
+        segments = payload.get(key)
+        if not isinstance(segments, list) or id(segments) in seen_segments:
+            continue
+        seen_segments.add(id(segments))
+        for segment in segments:
+            if isinstance(segment, dict) and not segment.get("speaker"):
+                segment["speaker"] = speaker

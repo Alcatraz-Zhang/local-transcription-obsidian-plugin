@@ -897,7 +897,7 @@ var StatusModal = class extends import_obsidian.Modal {
     super(app);
     this.status = status;
   }
-  statusEl;
+  statusEl = null;
   onOpen() {
     this.contentEl.empty();
     this.contentEl.createEl("h2", { text: "Local Transcription" });
@@ -914,7 +914,7 @@ var StatusModal = class extends import_obsidian.Modal {
   }
 };
 var LocalTranscriptionPlugin = class extends import_obsidian.Plugin {
-  pluginSettings;
+  pluginSettings = { ...DEFAULT_SETTINGS };
   recorder = null;
   chunks = [];
   statusModal = null;
